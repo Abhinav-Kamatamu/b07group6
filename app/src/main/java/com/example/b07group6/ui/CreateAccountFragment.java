@@ -13,19 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.b07group6.R;
 import com.example.b07group6.shared.AuthUserModel;
 import com.example.b07group6.shared.User;
-import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
-
-import java.util.concurrent.ExecutionException;
 
 
 public class CreateAccountFragment extends Fragment {
@@ -92,7 +86,7 @@ public class CreateAccountFragment extends Fragment {
                             false
                         );
                         authViewModel.loginUser(user);
-                        Navigation.findNavController(view).navigate(R.id.action_login_to_main);
+                        Navigation.findNavController(view).navigate(R.id.action_login_to_home);
                     });
                 });
             }

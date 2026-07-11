@@ -59,7 +59,7 @@ public class LoginFragment extends Fragment {
                 loginResult.ifPresentOrElse(
                         (user) -> {
                             authViewModel.loginUser(user);
-                            Navigation.findNavController(view).navigate(R.id.action_login_to_main);
+                            Navigation.findNavController(view).navigate(R.id.action_login_to_home);
                         },
                         () -> {
                             Toast.makeText(getContext(), "Invalid Credentials", Toast.LENGTH_SHORT).show();

@@ -15,9 +15,9 @@ import android.widget.TextView;
 import com.example.b07group6.R;
 import com.example.b07group6.shared.AuthUserModel;
 
-public class MainFragment extends Fragment {
+public class HomeFragment extends Fragment {
 
-    public MainFragment() {}
+    public HomeFragment() {}
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
