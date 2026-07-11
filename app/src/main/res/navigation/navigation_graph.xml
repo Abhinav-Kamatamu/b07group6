@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_graph"
+    app:startDestination="@id/loginFragment"> <!-- Tells app to open Login first -->
+
+    <!-- Transition to MainFragment -->
+    <action
+        android:id="@+id/action_login_to_main"
+        app:destination="@id/mainFragment"
+        app:popUpTo="@id/loginFragment"
+        app:popUpToInclusive="true" />
+
+    <!-- Transition to CreateAccountFragment -->
+    <action
+        android:id="@+id/action_create_account"
+        app:destination="@id/createAccountFragment" />
+
+    <!-- LoginFragment -->
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.b07group6.ui.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login"/>
+
+    <!-- CreateAccountFragment -->
+    <fragment
+        android:id="@+id/createAccountFragment"
+        android:name="com.example.b07group6.ui.CreateAccountFragment"
+        android:label="Create Account"
+        tools:layout="@layout/fragment_create_account" />
+
+    <!-- MainFragment -->
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.example.b07group6.ui.MainFragment"
+        android:label="Main Home"
+        tools:layout="@layout/fragment_main" />
+
+</navigation>
