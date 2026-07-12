@@ -1,4 +1,4 @@
-package com.example.b07group6.ui;
+package com.example.b07group6.ui.home;
 
 import android.os.Bundle;
 
@@ -15,8 +15,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.b07group6.R;
-import com.example.b07group6.shared.AuthUserModel;
-import com.example.b07group6.shared.User;
+import com.example.b07group6.shared.UserViewModel;
+import com.example.b07group6.construct.User;
 
 public class HomeFragment extends Fragment {
 
@@ -32,14 +32,14 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Get the AuthUserModel
+        // Get the UserViewModel
         NavBackStackEntry backStackEntry = Navigation.findNavController(view).getBackStackEntry(R.id.navigation_graph);
-        AuthUserModel authUserModel = new ViewModelProvider(backStackEntry).get(AuthUserModel.class);
+        UserViewModel userViewModel = new ViewModelProvider(backStackEntry).get(UserViewModel.class);
 
         TextView usernameDisplay = view.findViewById(R.id.display_username);
         TextView emailDisplay = view.findViewById(R.id.display_email);
         TextView idDisplay = view.findViewById(R.id.display_id);
-        User user = authUserModel.getCurrentUser();
+        User user = userViewModel.getCurrentUser();
         usernameDisplay.setText("Username: " + user.getUsername());
         emailDisplay.setText("Email: " + user.getEmail());
         idDisplay.setText("ID: " + user.getId());

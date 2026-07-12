@@ -1,6 +1,4 @@
-package com.example.b07group6.shared;
-
-import com.google.firebase.auth.FirebaseUser;
+package com.example.b07group6.construct;
 
 public class User {
     private String id;

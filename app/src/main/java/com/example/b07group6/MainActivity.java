@@ -21,7 +21,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            // We don't want the keyboard to restrict our ui elements. Instead,
+            // when a keyboard appears, get its size/dimenstions, and use that
+            // to determine how much padding we have. We basically view the keyboard
+            // as padding if it exists
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+            v.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    Math.max(systemBars.bottom, ime.bottom)
+            );
             return insets;
         });
         // Should we support staying logged in even if you close the app
