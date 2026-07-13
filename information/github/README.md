@@ -13,33 +13,33 @@ cd b07group6
 
 ## Standard Development Workflow
 
-1. `git checkout main` → `git pull origin main`
-2. `git checkout -b <BRANCH-NAME>`
+1. `git checkout <PARENT-BRANCH>` → `git pull origin <PARENT-BRANCH>`
+2. `git checkout -b <YOUR-BRANCH-NAME>`
 3. Make changes → `git add .` → `git commit -m "message"`
-4. `git push origin <BRANCH-NAME>`
+4. `git push -u origin <YOUR-BRANCH-NAME>`
 5. Create PR on GitHub and move work item to Review
 6. Request a reviewer
 7. Get review approval
 8. Move the item to Done on Jira after it has been reviewed
-10. `git checkout main` → `git pull origin main`
+10. `git checkout <PARENT-BRANCH>` → `git pull origin <PARENT-BRANCH>`
 11. Repeat for next task
 
 Following this workflow ensures clean collaboration and maintains code quality across the b07group6 project.
 
 ## Detailed Steps for Standard Development Workflow
 
-### 2. Pull Latest Changes from Main
+### 2. Pull Latest Changes from `<PARENT-BRANCH>`
 
-Before starting any new work, always pull the latest changes from the main branch:
+Before starting any new work, always pull the latest changes from the branch you wish to work off of:
 
-Switch to main branch:
+Switch to the `<PARENT-BRANCH>`:
 ```bash
-git checkout main
+git checkout <PARENT-BRANCH>
 ```
 
 Pull latest changes:
 ```bash
-git pull origin main
+git pull origin <PARENT-BRANCH>
 ```
 
 ### 3. Create a New Feature Branch
@@ -69,7 +69,7 @@ Examples:
 
 Create and switch to a new branch:
 ```bash
-git checkout -b <BRANCH-NAME>
+git checkout -b <YOUR-BRANCH-NAME>
 ```
 
 Example:
@@ -93,7 +93,7 @@ git commit -m "Add feature X"
 
 Push your branch to remote:
 ```bash
-git push origin <BRANCH-NAME>
+git push -u origin <YOUR-BRANCH-NAME>
 ```
 
 
@@ -124,25 +124,25 @@ git push origin <BRANCH-NAME>
 1. Reviewers examine the code changes
 2. Leave comments or suggestions if needed
 3. Click **"Approve"** when satisfied, move task to Done in Jira and merge branch
-5. The branch will be merged into `main`, so switch back to the main branch locally and pull changes
+5. The branch will be merged into `<PARENT-BRANCH>`, so switch back to the parent branch locally and pull changes
 
 ### 7. After PR is Merged
 
-Switch back to main branch and pull the latest changes:
+Switch back to parent branch and pull the latest changes:
 
-Switch back to main:
+Switch back to parent branch:
 ```bash
-git checkout main
+git checkout <PARENT-BRANCH>
 ```
 
 Pull the merged changes:
 ```bash
-git pull origin main
+git pull origin <PARENT-BRANCH>
 ```
 
 Delete the local feature branch (optional, but recommended):
 ```bash
-git branch -d <BRANCH-NAME>
+git branch -d <YOUR-BRANCH-NAME>
 ```
 
 ## Branch Management Commands
@@ -156,7 +156,7 @@ git branch -a
 
 Switch between branches:
 ```bash
-git checkout <BRANCH-NAME>
+git checkout <YOUR-BRANCH-NAME>
 ```
 
 Check current branch and status:
@@ -167,6 +167,10 @@ git status
 See commit history:
 ```bash
 git log --oneline
+```
+See commit history graph:
+```bash
+git log --graph --all
 ```
 
 See differences between branches:
@@ -183,7 +187,7 @@ git checkout main
 
 Switch to a feature branch:
 ```bash
-git checkout <BRANCH-NAME>
+git checkout <YOUR-BRANCH-NAME>
 ```
 
 Create and switch to a new branch:
@@ -207,27 +211,27 @@ git checkout -b <NEW-BRANCH-NAME>
 
 If you encounter merge conflicts:
 
-Pull latest changes from main:
+Pull latest changes from parent branch:
 ```bash
-git checkout main
-git pull origin main
+git checkout <PARENT-BRANCH>
+git pull origin <PARENT-BRANCH>
 ```
 
 Switch back to your branch:
 ```bash
-git checkout <your-branch>
+git checkout <YOUR-BRANCH>
 ```
 
-Merge main into your branch:
+Merge parent branch into your branch:
 ```bash
-git merge main
+git merge <PARENT-BRANCH>
 ```
 
 Resolve conflicts in your editor, then commit the changes:
 ```bash
 git add .
 git commit -m "Resolve merge conflicts"
-git push origin <your-branch>
+git push -u origin <YOUR-BRANCH>
 ```
 
 ### Need Help?
