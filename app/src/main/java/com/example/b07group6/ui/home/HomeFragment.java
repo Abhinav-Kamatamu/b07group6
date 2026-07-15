@@ -12,7 +12,9 @@ import androidx.navigation.Navigation;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.b07group6.R;
 import com.example.b07group6.shared.UserViewModel;
@@ -39,9 +41,14 @@ public class HomeFragment extends Fragment {
         TextView usernameDisplay = view.findViewById(R.id.display_username);
         TextView emailDisplay = view.findViewById(R.id.display_email);
         TextView idDisplay = view.findViewById(R.id.display_id);
+        Button button = view.findViewById(R.id.go_to_add_edit_artifact_button);
         User user = userViewModel.getCurrentUser();
         usernameDisplay.setText("Username: " + user.getUsername());
         emailDisplay.setText("Email: " + user.getEmail());
-        idDisplay.setText("ID: " + user.getId());
+        idDisplay.setText("ID: " + user.getUid());
+        button.setOnClickListener(v -> {
+            Toast.makeText(getContext(), "BFI", Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(requireView()).navigate(R.id.action_home_to_add_edit_artifact);
+        });
     }
 }
