@@ -51,5 +51,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/display_email"
             app:layout_constraintVertical_bias="0.0" />
+        <!-- Login -->
+        <Button
+            android:id="@+id/go_to_add_edit_artifact_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Go To AddEdit"
+            app:layout_constraintEnd_toEndOf="@id/display_id"
+            app:layout_constraintStart_toStartOf="@id/display_id"
+            app:layout_constraintTop_toBottomOf="@id/display_id" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
