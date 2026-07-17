@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/bookmark"
+        android:title="Home" />
+
+    <!-- This tab will only show for User Type A -->
+    <item
+        android:id="@+id/nav_admin_panel"
+        android:icon="@drawable/add_circle"
+        android:title="Admin" />
+
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/profile_logo"
+        android:title="Profile" />
+</menu>
