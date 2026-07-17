@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.example.b07group6.construct.Artifact;
 import com.example.b07group6.construct.Comment;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
