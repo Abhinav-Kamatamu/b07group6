@@ -16,6 +16,8 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,7 +26,6 @@ import com.example.b07group6.shared.UserViewModel;
 import com.example.b07group6.construct.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.search.SearchBar;
-import com.google.android.material.search.SearchView;
 
 public class HomeFragment extends Fragment {
     private BottomNavigationView bottomNav;
@@ -44,67 +45,94 @@ public class HomeFragment extends Fragment {
         NavBackStackEntry backStackEntry = Navigation.findNavController(view).getBackStackEntry(R.id.navigation_graph);
         UserViewModel userViewModel = new ViewModelProvider(backStackEntry).get(UserViewModel.class);
 
+        // Get the bottomNav bar
+        bottomNav = view.findViewById(R.id.bottom_navigation);
+
 
         User user = userViewModel.getCurrentUser();
 
-        generateMenu(view, true);
-
-        SearchView searchView = view.findViewById(R.id.searchView);
-        BottomNavigationView bottomNav = view.findViewById(R.id.bottom_navigation);
-        SearchBar searchBar = view.findViewById(R.id.searchBar);
+        generateMenu(user.isAdmin()); // Adjust based on if admin
 
 
-        searchView.getEditText().setOnEditorActionListener((textView, actionId, event) -> {
-            String query = textView.getText().toString();
-            // Handle search action
-            Toast.makeText(getContext(), "Search: " + query, Toast.LENGTH_SHORT).show();
-            searchView.hide();
-            searchBar.setText(query);
-            return false;
-        });
-        searchView.getEditText().addTextChangedListener(new TextWatcher() {
+        EditText searchEditText = view.findViewById(R.id.searchEditText);
+        searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String query = s.toString();
-                // Filter or update results as user types
+                // Handle search query changes here
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
-        });
-
-        searchBar.setOnClickListener(v -> {
-            searchView.show();
-        });
-
-        searchView.addTransitionListener(new SearchView.TransitionListener() {
-            @Override
-            public void onStateChanged(
-                    SearchView searchView,
-                    SearchView.TransitionState previousState,
-                    SearchView.TransitionState newState) {
-                if (newState == SearchView.TransitionState.SHOWING) {
-                    bottomNav.setVisibility(View.GONE);
-                } else if (newState == SearchView.TransitionState.HIDDEN) {
-                    bottomNav.setVisibility(View.VISIBLE);
-                }
+            public void afterTextChanged(Editable s) {
+                Toast.makeText(getContext(), s, Toast.LENGTH_LONG).show();
             }
         });
     }
 
 
-    private void generateMenu(View view, boolean isAdmin){
-        bottomNav = view.findViewById(R.id.bottom_navigation);
-
+    private void generateMenu(boolean isAdmin){
         Menu menu = bottomNav.getMenu();
-        //menu.clear(); // Apparently convention to clear existing items
 
-        if(isAdmin){
-//            menu.add(0, R.id.nav_profile, 0, "")
-//                    .setIcon(R.drawable.profile_logo);
+        if(!isAdmin){
+            menu.removeItem(R.id.nav_add);
         }
     }
 }
+
+/*
+
+// 1. Get reference to your SearchView
+android.widget.SearchView searchView = view.findViewById(R.id.searchView);
+
+// 2. Make the entire circular bar clickable to open typing mode
+        searchView.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        searchView.setIconified(false); // Expands the search view and brings up keyboard
+    }
+});
+
+
+// 3. Handle the back press behavior (requires AndroidX AppCompatActivity)
+// 3. Handle the back press behavior
+
+requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
+    @Override
+    public void handleOnBackPressed() {
+        View rootLayout = view.findViewById(R.id.coordinator_layout);
+
+        // 1. Check if the keyboard is actually open/visible on screen
+        boolean isKeyboardOpen = androidx.core.view.WindowInsetsCompat.toWindowInsetsCompat(
+                requireActivity().getWindow().getDecorView().getRootWindowInsets()
+        ).isVisible(androidx.core.view.WindowInsetsCompat.Type.ime());
+
+        if (searchView.hasFocus() && isKeyboardOpen) {
+            // PRESS 1: Keyboard is open. Close it, but keep the cursor.
+            android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager)
+                    requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
+            }
+        }
+        else if (searchView.hasFocus()) {
+            // PRESS 2: Keyboard is already closed, but cursor is still blinking.
+            // Move focus to the root layout to strip the cursor, keeping the text intact.
+            if (rootLayout != null) {
+                rootLayout.setFocusableInTouchMode(true);
+                rootLayout.requestFocus();
+            }
+            searchView.clearFocus();
+        }
+        else {
+            // PRESS 3: Search bar has no focus/cursor. Clean exit.
+            setEnabled(false);
+            requireActivity().getOnBackPressedDispatcher().onBackPressed();
+            setEnabled(true);
+        }
+    }
+});
+
+ */
