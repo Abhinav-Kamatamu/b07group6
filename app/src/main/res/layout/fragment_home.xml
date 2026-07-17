@@ -2,7 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/coordinator_layout"
+    android:id="@+id/constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipChildren="false"
@@ -13,42 +13,53 @@
         android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
         app:liftOnScroll="true">
 
         <androidx.appcompat.widget.Toolbar
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            app:layout_scrollFlags="scroll|enterAlways">
 
             <LinearLayout
+                android:id="@+id/searchBarContainer"
                 android:layout_width="match_parent"
                 android:layout_height="49dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginEnd="17dp"
                 android:layout_marginStart="17dp"
+                android:layout_marginEnd="17dp"
                 android:background="@drawable/search_bar_background"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp">
 
                 <ImageView
+                    android:id="@+id/searchIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_search"
                     android:contentDescription="Search icon"
+                    android:src="@drawable/ic_search"
                     app:tint="@color/black" />
 
                 <EditText
                     android:id="@+id/searchEditText"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginStart="12dp"
+                    android:layout_weight="1"
                     android:background="@null"
                     android:hint="Search..."
-                    android:textColorHint="@color/black"
+                    android:inputType="text"
                     android:textColor="@color/black"
-                    android:inputType="text" />
+                    android:textColorHint="@color/black" />
+
+                <ImageView
+                    android:id="@+id/clearButton"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Clear"
+                    android:src="@drawable/ic_close"
+                    app:tint="@color/black" />
 
             </LinearLayout>
 
@@ -57,34 +68,61 @@
     </com.google.android.material.appbar.AppBarLayout>
 
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/recyclerView"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:clipToPadding="false"-->
+<!--        android:paddingBottom="56dp"-->
+<!--        app:layout_behavior="@string/appbar_scrolling_view_behavior" />-->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="56dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
 
+        android:fillViewport="true">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="9000dp"
+            android:orientation="vertical">
+
+            <!-- You can leave this empty, or add a few colored views to visualize scrolling -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:text="HELLOWS"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:background="#4CAF50"
+                android:layout_marginTop="700dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:text="HELLO"
+                android:background="#FF5722" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_margin="0dp"
+        android:layout_marginBottom="0dp"
         android:padding="0dp"
         app:elevation="0dp"
         app:itemGravity="center"
         app:itemIconSize="35dp"
         app:itemPaddingBottom="0dp"
-        app:itemPaddingTop="5dp"
+        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
+        app:itemPaddingTop="0dp"
         app:labelVisibilityMode="labeled"
-        app:layout_insetEdge="none"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/bottom_nav_menu" />
-
-
-
-
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -35,6 +35,7 @@
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
     </fragment>
+
     <!-- HomeFragment -->
     <fragment
         android:id="@+id/homeFragment"

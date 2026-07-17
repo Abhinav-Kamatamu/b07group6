@@ -72,6 +72,7 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
     implementation(platform("com.google.firebase:firebase-bom:34.16.0"))
+    implementation("androidx.activity:activity:1.9.0") // Hopefully adds the edge-to-edge compatability ;(
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
