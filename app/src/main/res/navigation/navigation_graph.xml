@@ -4,6 +4,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation_graph"
     app:startDestination="@id/loginFragment">
+
+    <action
+        android:id="@+id/action_global_to_home"
+        app:destination="@id/homeFragment" />
+    <action
+        android:id="@+id/action_global_to_add_edit"
+        app:destination="@id/addEditArtifactFragment" />
+    <action
+        android:id="@+id/action_global_to_profile"
+        app:destination="@id/homeFragment" />
+    <action
+        android:id="@+id/action_global_to_saved"
+        app:destination="@id/homeFragment" />
+
     <!-- LoginFragment -->
     <fragment
         android:id="@+id/loginFragment"

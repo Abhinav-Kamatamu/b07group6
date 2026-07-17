@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavBackStackEntry;
@@ -65,15 +66,11 @@ public class HomeFragment extends Fragment {
         UserViewModel userViewModel = new ViewModelProvider(backStackEntry).get(UserViewModel.class);
 
         // Get the bottomNav bar
-        bottomNav = view.findViewById(R.id.bottom_navigation);
+        bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
         searchBarContainer = view.findViewById(R.id.searchBarContainer);
         searchEditText = view.findViewById(R.id.searchEditText);
         clearButton = view.findViewById(R.id.clearButton);
         searchIcon = view.findViewById(R.id.searchIcon);
-
-
-        // VERY IMPORTANT LINE!!!! Removes excess padding on bottomNav
-        ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> insets);
 
 
         User user = userViewModel.getCurrentUser();
@@ -82,7 +79,11 @@ public class HomeFragment extends Fragment {
 
 
         setListeners();
-        handleBottomNavigation();
+        // Scroll Space Adder has been disaled becasue we changed to Reletive Layout in activity_main.xml
+//        scrollSpaceAdder(view);
+
+
+
 
 //        EditText searchEditText = view.findViewById(R.id.searchEditText);
 //        searchEditText.addTextChangedListener(new TextWatcher() {
@@ -102,32 +103,7 @@ public class HomeFragment extends Fragment {
 //        });
     }
 
-    private void handleBottomNavigation(){
-        bottomNav.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
 
-            if (itemId == R.id.nav_saved) {
-                // switch to saved artifacts fragment
-                Toast.makeText(getContext(), "Saved Artifacts Launched", Toast.LENGTH_SHORT).show();
-                return true;
-            } else if (itemId == R.id.nav_home) {
-                // switch to add and edit fragment
-
-                Toast.makeText(getContext(), "Home Launched", Toast.LENGTH_SHORT).show();
-                return true;
-            } else if (itemId == R.id.nav_add) {
-                // switch to add and edit fragment
-                Toast.makeText(getContext(), "Add and Edit Launched", Toast.LENGTH_SHORT).show();
-                return true;
-            } else if (itemId == R.id.nav_profile) {
-                // switch to profile fragment
-                Toast.makeText(getContext(), "Profile Launched", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-
-            return false;
-        });
-    }
     private void setListeners(){
 
         clearButton.setVisibility(View.GONE);
@@ -156,7 +132,13 @@ public class HomeFragment extends Fragment {
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(searchEditText.getText().isEmpty()){
+                    searchEditText.clearFocus();
+                    clearButton.setVisibility(View.GONE);
+                    return;
+                }
                 searchEditText.getText().clear();
+                clearButton.setVisibility(View.GONE);
             }
         });
     }
@@ -179,11 +161,30 @@ public class HomeFragment extends Fragment {
 
 
     private void generateMenu(boolean isAdmin){
+        bottomNav.setVisibility(View.VISIBLE);
         Menu menu = bottomNav.getMenu();
 
         if(!isAdmin){
             menu.removeItem(R.id.nav_add);
         }
+
+        bottomNav.post(() -> bottomNav.setSelectedItemId(R.id.nav_home));
+    }
+
+    private void scrollSpaceAdder(View view){
+        NestedScrollView scrollView = view.findViewById(R.id.homeScrollView);
+
+        bottomNav.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+            int navHeight = bottomNav.getHeight();
+            if (scrollView.getPaddingBottom() != navHeight) {
+                scrollView.setPadding(
+                        scrollView.getPaddingLeft(),
+                        scrollView.getPaddingTop(),
+                        scrollView.getPaddingRight(),
+                        navHeight
+                );
+            }
+        });
     }
 }
 

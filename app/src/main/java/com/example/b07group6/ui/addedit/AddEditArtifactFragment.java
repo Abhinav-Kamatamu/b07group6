@@ -89,10 +89,10 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
                 .getBackStackEntry(R.id.navigation_graph);
         userViewModel = new ViewModelProvider(backStackEntry).get(UserViewModel.class);
 
-        if (!userViewModel.getCurrentUser().isAdmin()) {
-            navigateToHome();
-            return;
-        }
+//        if (!userViewModel.getCurrentUser().isAdmin()) {
+//            navigateToHome();
+//            return;
+//        }
 
         defineVariablesFrom(view);
 
