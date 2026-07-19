@@ -26,7 +26,7 @@ import com.bumptech.glide.Glide;
 import com.example.b07group6.R;
 import com.example.b07group6.backend.DatabaseRepository;
 import com.example.b07group6.backend.FirebaseDatabaseRepository;
-import com.example.b07group6.backend.SupabaseImageUploader;
+import com.example.b07group6.backend.SupabaseImageRepository;
 import com.example.b07group6.construct.Artifact;
 import com.example.b07group6.shared.UserViewModel;
 
@@ -100,7 +100,7 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
         defineVariablesFrom(view);
 
         FirebaseDatabaseRepository databaseRepository = new FirebaseDatabaseRepository();
-        SupabaseImageUploader imageUploader = new SupabaseImageUploader(requireContext());
+        SupabaseImageRepository imageUploader = new SupabaseImageRepository(requireContext());
         String lotNumber = userViewModel.getArtifactEditingLotNumber();
         boolean isEditMode = lotNumber != null;
 

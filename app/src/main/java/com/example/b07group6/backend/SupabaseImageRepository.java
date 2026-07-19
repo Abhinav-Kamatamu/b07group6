@@ -24,14 +24,14 @@ import okhttp3.Response;
 
 import com.example.b07group6.BuildConfig;
 
-public class SupabaseImageUploader implements ImageUploader {
+public class SupabaseImageRepository implements ImageRepository {
 
     private static final int MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
 
     private final Context appContext;
     private final OkHttpClient client = new OkHttpClient();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    public SupabaseImageUploader(Context context) {
+    public SupabaseImageRepository(Context context) {
         appContext = context.getApplicationContext();
     }
 
@@ -94,22 +94,69 @@ public class SupabaseImageUploader implements ImageUploader {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 // Network failure
-                postError(callback, "Image upload failed: " + e.getMessage());
+                mainHandler.post(() -> callback.onError("Image upload failed: " + e.getMessage()));
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                try (response) {
+                    if (response.isSuccessful()) {
+                        // Public URL that can be stored in Firebase and loaded with Glide
+                        HttpUrl publicUrl = buildStorageUrl("storage/v1/object/public", filePath);
+                        if (publicUrl == null) {
+                            mainHandler.post(() -> callback.onError("Could not build image URL."));
+                        } else {
+                            mainHandler.post(() -> callback.onSuccess(publicUrl.toString()));
+                        }
+                    } else {
+                        mainHandler.post(() -> callback.onError("Image upload failed with status " + response.code() + "."));
+                    }
+                }
+            }
+        });
+    }
+
+    public void deleteImage(String publicUrl, DeleteCallback callback) {
+        if (
+                isBlank(BuildConfig.SUPABASE_URL) || isBlank(BuildConfig.SUPABASE_ANON_KEY)
+                || isBlank(BuildConfig.SUPABASE_IMAGE_BUCKET)
+        ) {
+            callback.onError("Image deleter not configured with URL, anon key, and bucket name");
+            return;
+        }
+
+        if (isBlank(publicUrl) || !publicUrl.contains("/public/")) {
+            callback.onError("Could not parse storage path from image URL.");
+            return;
+        }
+
+        String deleteUrlString = publicUrl.replaceFirst("/public/", "/");
+        HttpUrl deleteUrl = HttpUrl.parse(deleteUrlString);
+        if (deleteUrl == null) {
+            callback.onError("The supabase URL is invalid.");
+            return;
+        }
+
+        Request request = new Request.Builder()
+                .url(deleteUrl)
+                .addHeader("apikey", BuildConfig.SUPABASE_ANON_KEY)
+                .addHeader("Authorization", "Bearer " + BuildConfig.SUPABASE_ANON_KEY)
+                .delete()
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                mainHandler.post(() -> callback.onError("Image delete failed: " + e.getMessage()));
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
                 try {
                     if (response.isSuccessful()) {
-                        // Public URL that can be stored in Firebase and loaded with Glide
-                        HttpUrl publicUrl = buildStorageUrl("storage/v1/object/public", filePath);
-                        if (publicUrl == null) {
-                            postError(callback, "Could not build image URL.");
-                        } else {
-                            postSuccess(callback, publicUrl.toString());
-                        }
+                        mainHandler.post(() -> callback.onSuccess());
                     } else {
-                        postError(callback, "Image upload failed with status " + response.code() + ".");
+                        mainHandler.post(() -> callback.onError("Image delete failed with status " + response.code() + "."));
                     }
                 } finally {
                     response.close();
@@ -152,14 +199,6 @@ public class SupabaseImageUploader implements ImageUploader {
                 .addPathSegment(BuildConfig.SUPABASE_IMAGE_BUCKET)
                 .addPathSegments(filePath)
                 .build();
-    }
-
-    private void postSuccess(UploadCallback callback, String publicUrl) {
-        mainHandler.post(() -> callback.onSuccess(publicUrl));
-    }
-
-    private void postError(UploadCallback callback, String message) {
-        mainHandler.post(() -> callback.onError(message));
     }
 
     private boolean isBlank(String value) {

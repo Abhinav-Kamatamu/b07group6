@@ -1,10 +1,11 @@
 package com.example.b07group6.ui.addedit;
 
 import android.net.Uri;
+import android.util.Log;
 
 import com.example.b07group6.backend.DatabaseRepository;
 import com.example.b07group6.backend.FirebaseDatabaseRepository;
-import com.example.b07group6.backend.ImageUploader;
+import com.example.b07group6.backend.ImageRepository;
 
 import java.util.Map;
 
@@ -12,18 +13,18 @@ public class AddEditArtifactPresenter implements AddEditArtifactContract.Present
 
     private final AddEditArtifactContract.View view;
     private final FirebaseDatabaseRepository databaseRepository;
-    private final ImageUploader imageUploader;
+    private final ImageRepository imageRepository;
     private final boolean isEditMode;
 
     public AddEditArtifactPresenter(
             AddEditArtifactContract.View view,
             FirebaseDatabaseRepository databaseRepository,
-            ImageUploader imageUploader,
+            ImageRepository imageRepository,
             boolean isEditMode
     ) {
         this.view = view;
         this.databaseRepository = databaseRepository;
-        this.imageUploader = imageUploader;
+        this.imageRepository = imageRepository;
         this.isEditMode = isEditMode;
     }
 
@@ -73,7 +74,7 @@ public class AddEditArtifactPresenter implements AddEditArtifactContract.Present
     private void saveArtifactAndImage(String lotNumber, Map<String, Object> draftArtifact, Uri localPathUri) {
         // If we have a new url, use it
         if (localPathUri != null) {
-            imageUploader.uploadImage(localPathUri, lotNumber, new ImageUploader.UploadCallback() {
+            imageRepository.uploadImage(localPathUri, lotNumber, new ImageRepository.UploadCallback() {
                 @Override
                 public void onSuccess(String newPublicUrl) {
                     saveArtifact(lotNumber, draftArtifact, newPublicUrl);
@@ -93,13 +94,7 @@ public class AddEditArtifactPresenter implements AddEditArtifactContract.Present
     }
 
     private void saveArtifact(String lotNumber, Map<String, Object> draftArtifact, String newPublicUrl) {
-        if (newPublicUrl != null)  {
-            String oldUrl = (String) draftArtifact.put("imageUrl", newPublicUrl);
-            if (oldUrl != null) {
-                // Delete old url from Supabase
-            }
-        }
-        databaseRepository.saveArtifact(lotNumber, draftArtifact, new DatabaseRepository.SimpleCallback() {
+        Runnable innerSaveArtifact = () -> databaseRepository.saveArtifact(lotNumber, draftArtifact, new DatabaseRepository.SimpleCallback() {
             @Override
             public void onSuccess() {
                 view.navigateToHome();
@@ -110,6 +105,28 @@ public class AddEditArtifactPresenter implements AddEditArtifactContract.Present
                 // We could not save for other reasons
                 view.showSaving(false, isEditMode);
                 view.showError(errorMessage);
+            }
+        });
+        String oldUrl = null;
+        if (newPublicUrl != null) {
+            oldUrl = (String) draftArtifact.put("imageUrl", newPublicUrl);
+        }
+        if (newPublicUrl == null || oldUrl == null) {
+            innerSaveArtifact.run();
+            return;
+        }
+        // Delete old url from Supabase
+        imageRepository.deleteImage(oldUrl, new ImageRepository.DeleteCallback() {
+            @Override
+            public void onSuccess() {
+                Log.d("Image Repo", "Successfully deleted the old URL");
+                innerSaveArtifact.run();
+            }
+
+            @Override
+            public void onError(String message) {
+                view.showError("Could not delete old image from Supabase: " + message);
+                view.showSaving(false, isEditMode);
             }
         });
     }
