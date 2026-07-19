@@ -25,8 +25,6 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
     private final DatabaseReference commentsRef = rootRef.child("comments");
     private final DatabaseReference savedRef = rootRef.child("savedArtifacts");
 
-    // ---------- Artifacts ----------
-
     @Override
     public void getAllArtifacts(ArtifactListCallback callback) {
         artifactsRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -85,28 +83,17 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
     }
 
     @Override
-    public void addArtifact(String lotNumber, Map<String, Object> artifactData, SimpleCallback callback) {
-        artifactsRef.child(lotNumber).setValue(artifactData)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        callback.onSuccess();
-                    } else {
-                        callback.onFailure("Failed to add artifact.");
-                    }
-                });
-    }
-
-    @Override
-    public void updateArtifact(String lotNumber, Map<String, Object> artifactData, SimpleCallback callback) {
+    public void saveArtifact(String lotNumber, Map<String, Object> artifactData, SimpleCallback callback) {
         artifactsRef.child(lotNumber).updateChildren(artifactData)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         callback.onSuccess();
                     } else {
-                        callback.onFailure("Failed to update artifact.");
+                        callback.onFailure("Failed to save artifact.");
                     }
                 });
     }
+
 
     @Override
     public void deleteArtifact(String lotNumber, SimpleCallback callback) {
@@ -119,8 +106,6 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
                     }
                 });
     }
-
-    // ---------- Likes ----------
 
     @Override
     public void getLikeStatus(String lotNumber, String uid, LikeStatusCallback callback) {
@@ -160,8 +145,6 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
             }
         });
     }
-
-    // ---------- Comments ----------
 
     @Override
     public void getComments(String lotNumber, CommentListCallback callback) {
@@ -205,8 +188,6 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
                 .addOnCompleteListener(task -> completeSimple(task, callback));
     }
 
-    // ---------- Saved artifacts ----------
-
     @Override
     public void getSavedArtifacts(String uid, StringListCallback callback) {
         savedRef.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -247,8 +228,6 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
             }
         });
     }
-
-    // ---------- Helper ----------
 
     private void completeSimple(com.google.android.gms.tasks.Task<Void> task, SimpleCallback callback) {
         if (task.isSuccessful()) {
