@@ -2,7 +2,7 @@ package com.example.b07group6.ui.addedit;
 
 import android.net.Uri;
 
-import com.example.b07group6.construct.Artifact;
+import java.util.Map;
 
 public interface AddEditArtifactContract {
 
@@ -13,6 +13,6 @@ public interface AddEditArtifactContract {
     }
 
     interface Presenter {
-        void onSaveClicked(Artifact draftArtifact, Uri localPathUri);
+        void onSaveClicked(String lotNumber, Map<String, Object> draftArtifact, Uri localPathUri);
     }
 }

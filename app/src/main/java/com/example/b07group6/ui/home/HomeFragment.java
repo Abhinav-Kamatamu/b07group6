@@ -132,7 +132,7 @@ public class HomeFragment extends Fragment {
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(searchEditText.getText().isEmpty()){
+                if(searchEditText.getText().toString().isEmpty()){
                     searchEditText.clearFocus();
                     clearButton.setVisibility(View.GONE);
                     return;

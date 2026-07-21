@@ -24,20 +24,23 @@ import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
 import com.example.b07group6.R;
-import com.example.b07group6.backend.ArtifactOperator;
-import com.example.b07group6.backend.FirebaseArtifactOperator;
-import com.example.b07group6.backend.SupabaseImageUploader;
+import com.example.b07group6.backend.DatabaseRepository;
+import com.example.b07group6.backend.FirebaseDatabaseRepository;
+import com.example.b07group6.backend.SupabaseImageRepository;
 import com.example.b07group6.construct.Artifact;
 import com.example.b07group6.shared.UserViewModel;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 public class AddEditArtifactFragment extends Fragment implements AddEditArtifactContract.View {
 
     private AddEditArtifactContract.Presenter presenter;
     private UserViewModel userViewModel;
 
     private Artifact existingArtifact;
-    private Uri selectedImageUri;
+    private Uri selectedLocalImageUri;
 
     private EditText lotNumberField;
     private EditText nameField;
@@ -58,12 +61,11 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
     private View imagePlaceholderContent;
     private Button selectImageButton;
     private Button saveButton;
-
     private final ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher =
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
                 Log.d("ImagePicker", "Picker returned: " + uri);
                 if (uri != null) {
-                    selectedImageUri = uri;
+                    selectedLocalImageUri = uri;
                     // Note that you use this method to load images from a local Uri only.
                     // That is what we want.
                     imagePreview.setImageURI(uri);
@@ -96,14 +98,14 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
 
         defineVariablesFrom(view);
 
-        ArtifactOperator artifactOperator = new FirebaseArtifactOperator();
-        SupabaseImageUploader imageUploader = new SupabaseImageUploader(requireContext());
+        FirebaseDatabaseRepository databaseRepository = new FirebaseDatabaseRepository();
+        SupabaseImageRepository imageUploader = new SupabaseImageRepository(requireContext());
         String lotNumber = userViewModel.getArtifactEditingLotNumber();
         boolean isEditMode = lotNumber != null;
 
         presenter = new AddEditArtifactPresenter(
                 this,
-                artifactOperator,
+                databaseRepository,
                 imageUploader,
                 isEditMode
         );
@@ -123,7 +125,7 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
             // disallow saving for now
             saveButton.setEnabled(false);
 
-            artifactOperator.getArtifact(lotNumber, new ArtifactOperator.GetCallback() {
+            databaseRepository.getArtifact(lotNumber, new DatabaseRepository.ArtifactCallback() {
                 @Override
                 public void onSuccess(Artifact artifact) {
                     existingArtifact = artifact;
@@ -168,7 +170,7 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
     }
 
     private void populateFieldsForEdit(Artifact artifact) {
-        nameField.setText(artifact.getName());
+        nameField.setText(artifact.getArtifactName());
         descriptionField.setText(artifact.getDescription());
 
         setSpinnerSelection(categorySpinner, R.array.category_options, artifact.getCategory());
@@ -202,32 +204,23 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
     }
 
     private void onSaveClicked() {
-        Artifact draftArtifact;
-        try {
-            draftArtifact = new Artifact(
-                    lotNumberField.getText().toString(),
-                    nameField.getText().toString(),
-                    descriptionField.getText().toString(),
-                    categorySpinner.getSelectedItem().toString(),
-                    materialSpinner.getSelectedItem().toString(),
-                    dynastyPeriodSpinner.getSelectedItem().toString(),
-                    culturalOriginField.getText().toString(),
-                    dimensionsField.getText().toString(),
-                    conditionReportField.getText().toString(),
-                    currentLocationField.getText().toString(),
-                    acquisitionMethodField.getText().toString(),
-                    provenanceField.getText().toString(),
-                    accessionNumberField.getText().toString(),
-                    notesField.getText().toString(),
-                    existingArtifact != null ? existingArtifact.getImageUrl() : null,
-                    userViewModel.getCurrentUser().getUid(),
-                    System.currentTimeMillis()
-            );
-        } catch (IllegalArgumentException e) {
-            showError(e.getMessage());
-            return;
-        }
-        presenter.onSaveClicked(draftArtifact, selectedImageUri);
+        Map<String, Object> draftArtifact = new HashMap<>();
+        String lotNumber = lotNumberField.getText().toString();
+        draftArtifact.put("artifactName", nameField.getText().toString());
+        draftArtifact.put("description", descriptionField.getText().toString());
+        draftArtifact.put("category", categorySpinner.getSelectedItem().toString());
+        draftArtifact.put("material", materialSpinner.getSelectedItem().toString());
+        draftArtifact.put("dynastyPeriod", dynastyPeriodSpinner.getSelectedItem().toString());
+        draftArtifact.put("culturalOrigin", culturalOriginField.getText().toString());
+        draftArtifact.put("dimensions", dimensionsField.getText().toString());
+        draftArtifact.put("conditionReport", conditionReportField.getText().toString());
+        draftArtifact.put("currentLocation", currentLocationField.getText().toString());
+        draftArtifact.put("acquisitionMethod", acquisitionMethodField.getText().toString());
+        draftArtifact.put("provenance", provenanceField.getText().toString());
+        draftArtifact.put("accessionNumber", accessionNumberField.getText().toString());
+        draftArtifact.put("notes", notesField.getText().toString());
+        draftArtifact.put("imageUrl", existingArtifact != null ? existingArtifact.getImageUrl(): null);
+        presenter.onSaveClicked(lotNumber, draftArtifact, selectedLocalImageUri);
     }
 
     @Override
