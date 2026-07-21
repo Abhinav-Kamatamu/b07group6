@@ -46,8 +46,7 @@ public interface DatabaseRepository {
     void getAllArtifacts(ArtifactListCallback callback);
     void getArtifact(String lotNumber, ArtifactCallback callback);
     void checkLotNumberExists(String lotNumber, BooleanCallback callback);
-    void addArtifact(String lotNumber, Map<String, Object> artifactData, SimpleCallback callback);
-    void updateArtifact(String lotNumber, Map<String, Object> artifactData, SimpleCallback callback);
+    void saveArtifact(String lotNumber, Map<String, Object> artifactData, SimpleCallback callback);
     void deleteArtifact(String lotNumber, SimpleCallback callback);
 
     // Likes

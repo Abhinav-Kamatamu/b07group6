@@ -50,7 +50,7 @@ public class CreateAccountPageTest {
     public void validInputs_navigatesHomeWithNewUser() {
         presenter.onCreateAccountClicked("Ronaldo", "name@gmail.com", "password123");
         assertTrue(view.navigatedHome);
-        assertEquals("dummy-uid", view.dummyUser.getId());
+        assertEquals("dummy-uid", view.dummyUser.getUid());
         assertEquals("Ronaldo", view.dummyUser.getUsername());
         assertEquals("name@gmail.com", view.dummyUser.getEmail());
         assertFalse(view.dummyUser.isAdmin());

@@ -51,5 +51,29 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/display_email"
             app:layout_constraintVertical_bias="0.0" />
+        <!-- Login -->
+        <Button
+            android:id="@+id/go_to_add_edit_artifact_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Go To AddEdit"
+            app:layout_constraintEnd_toEndOf="@id/display_id"
+            app:layout_constraintStart_toStartOf="@id/display_id"
+            app:layout_constraintTop_toBottomOf="@id/display_id" />
+        <EditText
+            android:id="@+id/lot_number_field"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="lotNumber"
+            android:inputType="textPersonName"
+            android:minHeight="48dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.367"
+            app:layout_constraintWidth_percent="0.6" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
