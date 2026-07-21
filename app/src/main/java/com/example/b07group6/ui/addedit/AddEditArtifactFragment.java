@@ -40,7 +40,7 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
     private UserViewModel userViewModel;
 
     private Artifact existingArtifact;
-    private Uri selectedImageUri;
+    private Uri selectedLocalImageUri;
 
     private EditText lotNumberField;
     private EditText nameField;
@@ -61,12 +61,11 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
     private View imagePlaceholderContent;
     private Button selectImageButton;
     private Button saveButton;
-
     private final ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher =
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
                 Log.d("ImagePicker", "Picker returned: " + uri);
                 if (uri != null) {
-                    selectedImageUri = uri;
+                    selectedLocalImageUri = uri;
                     // Note that you use this method to load images from a local Uri only.
                     // That is what we want.
                     imagePreview.setImageURI(uri);
@@ -221,7 +220,7 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
         draftArtifact.put("accessionNumber", accessionNumberField.getText().toString());
         draftArtifact.put("notes", notesField.getText().toString());
         draftArtifact.put("imageUrl", existingArtifact != null ? existingArtifact.getImageUrl(): null);
-        presenter.onSaveClicked(lotNumber, draftArtifact, selectedImageUri);
+        presenter.onSaveClicked(lotNumber, draftArtifact, selectedLocalImageUri);
     }
 
     @Override
