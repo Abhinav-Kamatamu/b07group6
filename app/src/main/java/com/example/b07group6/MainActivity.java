@@ -3,6 +3,7 @@ package com.example.b07group6;
 import static java.security.AccessController.getContext;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
             // Status bar (top) + side gesture areas go on the root.
             // Do NOT apply bars.bottom here — that's what lifts the nav bar and
             // creates the gap. Only pad the bottom while the keyboard is open.
-            v.setPadding(bars.left, bars.top, bars.right, ime.bottom);
+            v.setPadding(bars.left, bars.top, bars.right, 0);
 
             // The nav bar reaches the true bottom edge (drawing behind the system
             // navigation bar) and lifts its icons/labels above it with padding.
@@ -48,14 +49,9 @@ public class MainActivity extends AppCompatActivity {
             return windowInsets;
         });
 
-
-
-
-
-
-//        // VERY IMPORTANT LINE!!!! Removes excess padding on bottomNav
-//        ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> insets);
-//        ViewCompat.requestApplyInsets(bottomNav);
+        // This line hear makes the NavBar stick ot the very bottom. Commend these two out to enable a NavBarlift off
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> insets);
+        ViewCompat.requestApplyInsets(bottomNav);
 
         handleBottomNavigation();
 
@@ -67,10 +63,10 @@ public class MainActivity extends AppCompatActivity {
             NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.main_activity_fragment_view);
             assert navHostFragment != null;
-
             if (itemId == R.id.nav_saved) {
                 // switch to saved artifacts fragment
                 navHostFragment.getNavController().navigate(R.id.action_global_to_saved);
+//                Log.println(1, "Using home page now...");
                 return true;
             } else if (itemId == R.id.nav_home) {
                 // switch to add and edit fragment

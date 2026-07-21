@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -75,45 +76,41 @@ public class HomeFragment extends Fragment {
 
         User user = userViewModel.getCurrentUser();
 
-        generateMenu(user.isAdmin()); // Adjust based on if admin
+        generateMenu(true || user.isAdmin()); // Adjust based on if admin
 
 
         setListeners();
+
         // Scroll Space Adder has been disaled becasue we changed to Reletive Layout in activity_main.xml
 //        scrollSpaceAdder(view);
 
 
+        // Handling Back Presses:
+        backPressedCallback = new OnBackPressedCallback(false) {
+            @Override
+            public void handleOnBackPressed() {
+                searchEditText.getText().clear();
+                searchEditText.clearFocus();
+                clearButton.setVisibility(View.GONE);
+                hideKeyboard();
+                setEnabled(false);
+            }
+        };
 
-
-//        EditText searchEditText = view.findViewById(R.id.searchEditText);
-//        searchEditText.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                String query = s.toString();
-//                // search query to be handled here?
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//                Toast.makeText(getContext(), s, Toast.LENGTH_LONG).show();
-//            }
-//        });
+        requireActivity().getOnBackPressedDispatcher()
+                .addCallback(getViewLifecycleOwner(), backPressedCallback);
     }
 
 
     private void setListeners(){
 
         clearButton.setVisibility(View.GONE);
-        searchBarContainer.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                searchEditText.requestFocus();
-                clearButton.setVisibility(View.VISIBLE);
-            }
+
+        searchBarContainer.setOnClickListener(v -> {
+            searchEditText.requestFocus();
+            clearButton.setVisibility(View.VISIBLE);
         });
+
 
         searchEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -121,11 +118,29 @@ public class HomeFragment extends Fragment {
                 if(hasFocus){
                     clearButton.setVisibility(View.VISIBLE);
                     bottomNav.setVisibility(View.GONE);
+                    backPressedCallback.setEnabled(true);
                 }else{
                     clearButton.setVisibility(View.GONE);
                     bottomNav.setVisibility(View.VISIBLE);
+                    backPressedCallback.setEnabled(false);
                     hideKeyboard();
                 }
+            }
+        });
+        searchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || // This is code to get enter press from screen keyboard
+                        (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && // This is for external keyboard enter presses
+                                event.getAction() == KeyEvent.ACTION_DOWN)) {
+                    // ---- INSERT CODE TO HANDLE TEXT ACTION ------
+                    // (Basically our Recycle Viewer)
+
+                    searchEditText.clearFocus();
+                    hideKeyboard();
+                    return true;
+                }
+                return false;
             }
         });
 
@@ -138,7 +153,6 @@ public class HomeFragment extends Fragment {
                     return;
                 }
                 searchEditText.getText().clear();
-                clearButton.setVisibility(View.GONE);
             }
         });
     }
@@ -163,12 +177,14 @@ public class HomeFragment extends Fragment {
     private void generateMenu(boolean isAdmin){
         bottomNav.setVisibility(View.VISIBLE);
         Menu menu = bottomNav.getMenu();
+        menu.findItem(R.id.nav_home).setChecked(true);
 
         if(!isAdmin){
             menu.removeItem(R.id.nav_add);
         }
 
-        bottomNav.post(() -> bottomNav.setSelectedItemId(R.id.nav_home));
+//        bottomNav.post(() -> bottomNav.setSelectedItemId(R.id.nav_home));
+//              |--> This line causes errors because of infinite loop of calling the homepage which is bad.
     }
 
     private void scrollSpaceAdder(View view){

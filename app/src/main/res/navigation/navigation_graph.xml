@@ -7,15 +7,27 @@
 
     <action
         android:id="@+id/action_global_to_home"
+        app:launchSingleTop="true"
+        app:popUpTo="@id/navigation_graph"
+        app:popUpToInclusive="false"
         app:destination="@id/homeFragment" />
     <action
         android:id="@+id/action_global_to_add_edit"
+        app:launchSingleTop="true"
+        app:popUpTo="@id/navigation_graph"
+        app:popUpToInclusive="false"
         app:destination="@id/addEditArtifactFragment" />
     <action
         android:id="@+id/action_global_to_profile"
+        app:launchSingleTop="true"
+        app:popUpTo="@id/navigation_graph"
+        app:popUpToInclusive="false"
         app:destination="@id/homeFragment" />
     <action
         android:id="@+id/action_global_to_saved"
+        app:launchSingleTop="true"
+        app:popUpTo="@id/navigation_graph"
+        app:popUpToInclusive="false"
         app:destination="@id/homeFragment" />
 
     <!-- LoginFragment -->
