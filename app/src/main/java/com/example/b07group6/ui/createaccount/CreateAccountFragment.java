@@ -20,6 +20,7 @@ import com.example.b07group6.R;
 import com.example.b07group6.backend.FirebaseAuthOperator;
 import com.example.b07group6.shared.UserViewModel;
 import com.example.b07group6.construct.User;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class CreateAccountFragment extends Fragment implements CreateAccountContract.View {
     private CreateAccountContract.Presenter presenter;
@@ -38,6 +39,9 @@ public class CreateAccountFragment extends Fragment implements CreateAccountCont
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         presenter = new CreateAccountPresenter(this, new FirebaseAuthOperator());
+
+        BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
+        bottomNav.setVisibility(View.GONE);
 
         EditText usernameField = view.findViewById(R.id.username_field);
         EditText emailField = view.findViewById(R.id.email_field);

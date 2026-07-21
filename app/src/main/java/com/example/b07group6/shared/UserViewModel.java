@@ -6,6 +6,7 @@ import com.example.b07group6.construct.User;
 
 public class UserViewModel extends ViewModel {
     private User currentUser;
+    private String artifactEditingLotNumber;
 
     public void setCurrentUser(User user) {
         currentUser = user;
@@ -24,5 +25,18 @@ public class UserViewModel extends ViewModel {
 
     public void logout() {
         currentUser = null;
+    }
+
+
+    public boolean isInArtifactEditMode() {
+        return artifactEditingLotNumber != null;
+    }
+
+    public String getArtifactEditingLotNumber() {
+        return artifactEditingLotNumber;
+    }
+
+    public void setArtifactEditingLotNumber(String artifactEditingLotNumber) {
+        this.artifactEditingLotNumber = artifactEditingLotNumber;
     }
 }

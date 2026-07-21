@@ -56,4 +56,7 @@
         <item>Qing Dynasty (1644–1912 CE)</item>
         <item>Republic of China Period (1912–1949 CE)</item>
     </string-array>
+    <string name="supabase_image_bucket">TAAM Artifacts</string>
+    <string name="supabase_url">https://rbgzrjlpicqlubnwpyhr.supabase.co/</string>
+    <string name="supabase_anon_key">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiZ3pyamxwaWNxbHVibndweWhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NjM4NTUsImV4cCI6MjA5OTUzOTg1NX0.6s3UWqEP-qZzG9lMkRtqRJyRYj2WTbJ_u3Ldu3iZ8q0</string>
 </resources>

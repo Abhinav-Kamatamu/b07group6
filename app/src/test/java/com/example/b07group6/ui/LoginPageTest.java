@@ -45,7 +45,7 @@ public class LoginPageTest {
         authOperator.userRecordIsAdmin = false;
         presenter.onLoginClicked("name@gmail.com", "omg6767hehe");
         assertTrue(view.navigatedHome);
-        assertEquals("dummy-uid", view.dummyUser.getId());
+        assertEquals("dummy-uid", view.dummyUser.getUid());
         assertEquals("AnActualUsername", view.dummyUser.getUsername());
         assertEquals("name@gmail.com", view.dummyUser.getEmail());
         assertFalse(view.dummyUser.isAdmin());
