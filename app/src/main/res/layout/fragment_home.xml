@@ -1,79 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     tools:context=".ui.home.HomeFragment">
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <!-- Username Display -->
-        <TextView
-            android:id="@+id/display_username"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Username will appear here"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/display_email"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_chainStyle="packed" />
-        <!-- Email Display -->
-        <TextView
-            android:id="@+id/display_email"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Email will appear here"
-            android:textSize="16sp"
-            android:textColor="#555555"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/display_username" />
-        <!-- ID Display -->
-        <TextView
-            android:id="@+id/display_id"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="ID will appear here"
-            android:textColor="#555555"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/display_email"
-            app:layout_constraintVertical_bias="0.0" />
-        <!-- Login -->
-        <Button
-            android:id="@+id/go_to_add_edit_artifact_button"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Go To AddEdit"
-            app:layout_constraintEnd_toEndOf="@id/display_id"
-            app:layout_constraintStart_toStartOf="@id/display_id"
-            app:layout_constraintTop_toBottomOf="@id/display_id" />
-        <EditText
-            android:id="@+id/lot_number_field"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:hint="lotNumber"
-            android:inputType="textPersonName"
-            android:minHeight="48dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.367"
-            app:layout_constraintWidth_percent="0.6" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.core.widget.NestedScrollView>
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:liftOnScroll="true">
+
+        <androidx.appcompat.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_scrollFlags="scroll|enterAlways">
+
+            <LinearLayout
+                android:id="@+id/searchBarContainer"
+                android:layout_width="match_parent"
+                android:layout_height="49dp"
+                android:layout_marginStart="17dp"
+                android:layout_marginEnd="17dp"
+                android:background="@drawable/search_bar_background"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp">
+
+                <ImageView
+                    android:id="@+id/searchIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Search icon"
+                    android:src="@drawable/ic_search"
+                    app:tint="@color/black" />
+
+                <EditText
+                    android:id="@+id/searchEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:hint="Search..."
+                    android:inputType="text"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/black" />
+
+                <ImageView
+                    android:id="@+id/clearButton"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Clear"
+                    android:src="@drawable/ic_close"
+                    app:tint="@color/black" />
+
+            </LinearLayout>
+
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/recyclerView"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:clipToPadding="false"-->
+<!--        android:paddingBottom="56dp"-->
+<!--        app:layout_behavior="@string/appbar_scrolling_view_behavior" />-->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/homeScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="9000dp"
+            android:orientation="vertical">
+
+            <!-- You can leave this empty, or add a few colored views to visualize scrolling -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:text="HELLOWS"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:background="#4CAF50"
+                android:layout_marginTop="700dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:text="HELLO"
+                android:background="#FF5722" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -22,6 +22,7 @@ import com.example.b07group6.R;
 import com.example.b07group6.backend.FirebaseAuthOperator;
 import com.example.b07group6.construct.User;
 import com.example.b07group6.shared.UserViewModel;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class LoginFragment extends Fragment implements LoginContract.View {
     private LoginContract.Presenter presenter;
@@ -51,6 +52,9 @@ public class LoginFragment extends Fragment implements LoginContract.View {
         newAccountView.setOnClickListener(
                 v -> Navigation.findNavController(view).navigate(R.id.action_create_account)
         );
+
+        BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
+        bottomNav.setVisibility(View.GONE);
     }
 
     @Override
@@ -67,4 +71,5 @@ public class LoginFragment extends Fragment implements LoginContract.View {
         userViewModel.setCurrentUser(user);
         Navigation.findNavController(requireView()).navigate(R.id.action_login_to_home);
     }
+
 }
