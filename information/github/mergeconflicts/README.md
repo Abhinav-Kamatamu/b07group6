@@ -15,7 +15,7 @@ Press that and you're done merging!
 Finally, run:
 ```bash
 git add .
-git commit -m "commit message here"
+git commit
 ```
 
 And you're ready to push to remote.
