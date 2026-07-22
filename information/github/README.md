@@ -30,14 +30,15 @@ Following this workflow ensures clean collaboration and maintains code quality a
 
 ### 2. Pull Latest Changes from `<PARENT-BRANCH>`
 
-Before starting any new work, always pull the latest changes from the branch you wish to work off of:
+Before starting any new work, always pull the latest changes from the branch you wish to work
+off of (note for this project, we will mostly branch off of main, i.e. main is <PARENT-BRANCH>):
 
-Switch to the `<PARENT-BRANCH>`:
+Switch to the `<PARENT-BRANCH>` on your local machine:
 ```bash
 git checkout <PARENT-BRANCH>
 ```
 
-Pull latest changes:
+Pull latest changes from remote (GitHub):
 ```bash
 git pull origin <PARENT-BRANCH>
 ```
@@ -90,6 +91,24 @@ Commit with a descriptive message:
 ```bash
 git commit -m "Add feature X"
 ```
+
+*Always run `git status` before commiting to see what files you're about to commit.*
+#### 4.5. When you're ready to push your changes to GitHub:
+
+First update parent branch with the latest version from remote (GitHub):
+```bash
+git checkout <PARENT-BRANCH>
+git pull
+```
+
+Return to your branch and merge parent branch into your branch:
+```bash
+git checkout <YOUR-BRANCH-NAME>
+git merge <PARENT-BRANCH>
+```
+
+If there are no merge conflicts, everything should be committed, and you're ready to push to remote!
+However, if conflicts do occur, follow the steps in the `mergeconflicts` folder to resolve them.
 
 Push your branch to remote:
 ```bash
@@ -206,33 +225,6 @@ git checkout -b <NEW-BRANCH-NAME>
 7. **Clean up branches** - Delete merged branches to keep the repository tidy
 
 ## Troubleshooting
-
-### Merge Conflicts
-
-If you encounter merge conflicts:
-
-Pull latest changes from parent branch:
-```bash
-git checkout <PARENT-BRANCH>
-git pull origin <PARENT-BRANCH>
-```
-
-Switch back to your branch:
-```bash
-git checkout <YOUR-BRANCH>
-```
-
-Merge parent branch into your branch:
-```bash
-git merge <PARENT-BRANCH>
-```
-
-Resolve conflicts in your editor, then commit the changes:
-```bash
-git add .
-git commit -m "Resolve merge conflicts"
-git push -u origin <YOUR-BRANCH>
-```
 
 ### Need Help?
 
