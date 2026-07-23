@@ -68,46 +68,46 @@
     </com.google.android.material.appbar.AppBarLayout>
 
 
-<!--    <androidx.recyclerview.widget.RecyclerView-->
-<!--        android:id="@+id/recyclerView"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:clipToPadding="false"-->
-<!--        android:paddingBottom="56dp"-->
-<!--        app:layout_behavior="@string/appbar_scrolling_view_behavior" />-->
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/homeScrollView"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:fillViewport="true">
+        android:paddingBottom="56dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+<!--    <androidx.core.widget.NestedScrollView-->
+<!--        android:id="@+id/homeScrollView"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:clipToPadding="false"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+<!--        android:fillViewport="true">-->
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="9000dp"
-            android:orientation="vertical">
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="9000dp"-->
+<!--            android:orientation="vertical">-->
 
-            <!-- You can leave this empty, or add a few colored views to visualize scrolling -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:text="HELLOWS"/>
+<!--            &lt;!&ndash; You can leave this empty, or add a few colored views to visualize scrolling &ndash;&gt;-->
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="100dp"-->
+<!--                android:text="HELLOWS"/>-->
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:background="#4CAF50"
-                android:layout_marginTop="700dp" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:text="HELLO"
-                android:background="#FF5722" />
+<!--            <View-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="100dp"-->
+<!--                android:background="#4CAF50"-->
+<!--                android:layout_marginTop="700dp" />-->
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="100dp"-->
+<!--                android:text="HELLO"-->
+<!--                android:background="#FF5722" />-->
 
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+<!--        </LinearLayout>-->
+<!--    </androidx.core.widget.NestedScrollView>-->
 
 
 
