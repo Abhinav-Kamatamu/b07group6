@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/nestedScrollView">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -76,8 +77,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
+                android:button="@drawable/like_selector"
+                android:checked="false"
                 android:paddingRight="12dp"
-                android:button="@drawable/ic_favorite_activatable"
                 android:text="1.3k" />
 
             <CheckBox
@@ -85,7 +87,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingRight="12dp"
-                android:button="@drawable/ic_bookmark"
+                android:button="@drawable/bookmark_selector"
                 android:text="1.8M" />
 
             <Button
@@ -110,7 +112,7 @@
             android:layout_marginTop="24dp"
             android:text="Description"
             android:textSize="18sp"
-            android:textStyle="bold"
+            android:textStyle="bold|italic"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
@@ -119,15 +121,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
-            android:layout_marginEnd="30dp"
             android:layout_marginTop="8dp"
-            android:lineSpacingExtra="4dp"
-            android:textSize="14sp"
-            android:maxLines="4"
+            android:layout_marginEnd="30dp"
             android:ellipsize="end"
+            android:lineSpacingExtra="4dp"
+            android:maxLines="4"
             android:text="A Walk in the Park\nPeople go to the local park for fresh air. Some walk fast on the dirt path. Others sit on wooden benches to read books. Children run and play on the green grass.\nThe Value of Reading\nReading books helps people learn new things. Every page opens a door to a different world. Stories teach us about other places and people. Knowledge grows stronger with each new book we finish.\nEvening Calm\nThe day ends as the sky turns orange and pink. Shadows stretch long across the ground. Lights turn on in the cozy houses. Night brings a deep and peaceful calm."
-            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/descriptionHeader" />
 
         <TextView
@@ -165,24 +167,21 @@
             android:layout_marginTop="16dp"
             android:text="Comments"
             android:textSize="18sp"
-            android:textStyle="bold"
+            android:textStyle="bold|italic"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/commentsDivider" />
 
         <!-- Placeholder container — populate later with a RecyclerView or comment rows -->
-        <LinearLayout
-            android:id="@+id/commentsContainer"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
-            android:layout_marginEnd="30dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="24dp"
-            android:orientation="vertical"
-            app:layout_constraintStart_toStartOf="parent"
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/commentsHeader"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/commentsHeader" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
