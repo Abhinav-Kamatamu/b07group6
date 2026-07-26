@@ -8,6 +8,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:padding="24dp">
 
         <TextView
@@ -54,6 +55,7 @@
             android:background="@drawable/role_badge"
             android:paddingStart="16dp"
             android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:paddingEnd="16dp"
             android:textColor="#185FA5"
             android:textSize="12sp"
