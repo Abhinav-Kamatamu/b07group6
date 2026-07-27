@@ -20,6 +20,8 @@ import androidx.fragment.app.Fragment;
 
 import com.example.b07group6.R;
 
+import java.util.ArrayList;
+
 public class ArtifactViewFragment extends Fragment {
 
     private NestedScrollView nestedScrollView;
@@ -32,6 +34,8 @@ public class ArtifactViewFragment extends Fragment {
     private TextView commentsHeader;
 
     private boolean isDescriptionExpanded = false;
+
+    ArrayList<CommentModel> commentList = new ArrayList<>();
 
     @Nullable
     @Override
