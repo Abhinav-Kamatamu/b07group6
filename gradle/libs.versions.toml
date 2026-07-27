@@ -15,6 +15,7 @@ fragment = "1.8.9"
 navigationFragmentKtx = "2.9.8"
 navigationUiKtx = "2.9.8"
 firebaseDatabase = "22.0.1"
+cardview = "1.0.0"
 
 [libraries]
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
@@ -33,6 +34,7 @@ fragment = { group = "androidx.fragment", name = "fragment", version.ref = "frag
 navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
+cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
