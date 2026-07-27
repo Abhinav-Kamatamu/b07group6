@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Existing -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Primary palette — lighter/desaturated for dark backgrounds -->
+    <color name="primary">#D98A93</color>
+    <color name="primary_variant">#B5636D</color>
+    <color name="on_primary">#1C1C1C</color>
+
+    <!-- Accent/secondary -->
+    <color name="accent">#E0C079</color>
+    <color name="on_accent">#1C1C1C</color>
+
+    <!-- Background/surface — dark instead of cream/white -->
+    <color name="background">#121212</color>
+    <color name="surface">#1E1E1E</color>
+
+    <!-- Text — inverted -->
+    <color name="text_primary">#F5F5F5</color>
+    <color name="text_secondary">#B0B0B0</color>
+
+    <!-- Status -->
+    <color name="error">#CF6679</color>
+</resources>
