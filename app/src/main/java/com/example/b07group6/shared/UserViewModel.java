@@ -7,6 +7,7 @@ import com.example.b07group6.construct.User;
 public class UserViewModel extends ViewModel {
     private User currentUser;
     private String artifactEditingLotNumber;
+    private String extendedLotNumber;
 
     public void setCurrentUser(User user) {
         currentUser = user;
@@ -38,5 +39,13 @@ public class UserViewModel extends ViewModel {
 
     public void setArtifactEditingLotNumber(String artifactEditingLotNumber) {
         this.artifactEditingLotNumber = artifactEditingLotNumber;
+    }
+
+    public String getExtendedLotNumber() {
+        return extendedLotNumber;
+    }
+
+    public void setExtendedLotNumber(String extendedLotNumber) {
+        this.extendedLotNumber = extendedLotNumber;
     }
 }
