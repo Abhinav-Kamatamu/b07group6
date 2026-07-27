@@ -35,17 +35,11 @@ public class MainActivity extends AppCompatActivity {
 
         ViewCompat.setOnApplyWindowInsetsListener(root, (v, windowInsets) -> {
             Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            Insets ime  = windowInsets.getInsets(WindowInsetsCompat.Type.ime());
 
             // Status bar (top) + side gesture areas go on the root.
             // Do NOT apply bars.bottom here — that's what lifts the nav bar and
             // creates the gap. Only pad the bottom while the keyboard is open.
-            v.setPadding(bars.left, bars.top, bars.right, 0);
-
-            // The nav bar reaches the true bottom edge (drawing behind the system
-            // navigation bar) and lifts its icons/labels above it with padding.
-            bottomNav.setPadding(0, 0, 0, bars.bottom);
-
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
             return windowInsets;
         });
 
