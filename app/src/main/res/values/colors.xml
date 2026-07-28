@@ -2,5 +2,24 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="gray">#FFE8E8E8</color>
+
+    <!-- Primary palette -->
+    <color name="primary">#8B2131</color>
+    <color name="primary_variant">#6E1A26</color>
+    <color name="on_primary">#FFFFFF</color>
+
+    <!-- Accent/secondary -->
+    <color name="accent">#C9A24B</color>
+    <color name="on_accent">#1C1C1C</color>
+
+    <!-- Background/surface -->
+    <color name="background">#FAF7F2</color>
+    <color name="surface">#FFFFFF</color>
+
+    <!-- Text -->
+    <color name="text_primary">#1C1C1C</color>
+    <color name="text_secondary">#6E6E6E</color>
+
+    <!-- Status -->
+    <color name="error">#B00020</color>
 </resources>
