@@ -121,19 +121,19 @@ public class SupabaseImageRepository implements ImageRepository {
                 isBlank(BuildConfig.SUPABASE_URL) || isBlank(BuildConfig.SUPABASE_ANON_KEY)
                 || isBlank(BuildConfig.SUPABASE_IMAGE_BUCKET)
         ) {
-            callback.onError("Image deleter not configured with URL, anon key, and bucket name");
+            mainHandler.post(() -> callback.onError("Image deleter not configured with URL, anon key, and bucket name"));
             return;
         }
 
         if (isBlank(publicUrl) || !publicUrl.contains("/public/")) {
-            callback.onError("Could not parse storage path from image URL.");
+            mainHandler.post(() -> callback.onError("Could not parse storage path from image URL."));
             return;
         }
 
         String deleteUrlString = publicUrl.replaceFirst("/public/", "/");
         HttpUrl deleteUrl = HttpUrl.parse(deleteUrlString);
         if (deleteUrl == null) {
-            callback.onError("The supabase URL is invalid.");
+            mainHandler.post(() -> callback.onError("The supabase URL is invalid."));
             return;
         }
 
