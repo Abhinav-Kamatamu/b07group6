@@ -32,6 +32,11 @@ public interface DatabaseRepository {
         void onFailure(String errorMessage);
     }
 
+    interface CommentCallback {
+        void onSuccess(Comment comment);
+        void onFailure(String errorMessage);
+    }
+
     interface LikeStatusCallback {
         void onResult(long likeCount, boolean likedByCurrentUser);
         void onFailure(String errorMessage);
@@ -42,19 +47,30 @@ public interface DatabaseRepository {
         void onFailure(String errorMessage);
     }
 
+    enum LikeType {
+        ARTIFACT,
+        COMMENT,
+    }
+
+    enum SaveArtifactMode {
+        CREATE,
+        UPDATE
+    }
+
     // Artifacts
     void getAllArtifacts(ArtifactListCallback callback);
     void getArtifact(String lotNumber, ArtifactCallback callback);
     void checkLotNumberExists(String lotNumber, BooleanCallback callback);
-    void saveArtifact(String lotNumber, Map<String, Object> artifactData, SimpleCallback callback);
+    void saveArtifact(SaveArtifactMode mode, String lotNumber, Map<String, Object> artifactData, SimpleCallback callback);
     void deleteArtifact(String lotNumber, SimpleCallback callback);
 
     // Likes
-    void getLikeStatus(String lotNumber, String uid, LikeStatusCallback callback);
-    void toggleLike(String lotNumber, String uid, SimpleCallback callback);
+    void getLikeStatus(LikeType type, String typeID, String uid, LikeStatusCallback callback);
+    void toggleLike(LikeType type, String typeID, String uid, SimpleCallback callback);
 
     // Comments
-    void getComments(String lotNumber, CommentListCallback callback);
+    void getAllComments(String lotNumber, CommentListCallback callback);
+    void getComment(String commentID, CommentCallback callback);
     void addComment(String lotNumber, String text, String username, String uid, SimpleCallback callback);
     void deleteComment(String lotNumber, String commentId, SimpleCallback callback);
 
