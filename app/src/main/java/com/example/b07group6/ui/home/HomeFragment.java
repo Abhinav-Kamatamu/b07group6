@@ -104,6 +104,8 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onSingleClick(int position) {
                         // Write code to navigate to extended artifact view page for this artifact
+                        userViewModel.setExtendedLotNumber(artifactList.get(position).getLotNumber());
+                        Navigation.findNavController(requireView()).navigate(R.id.action_global_extended);
                     }
 
                     @Override
