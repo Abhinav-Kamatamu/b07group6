@@ -14,6 +14,7 @@
             android:id="@+id/email_field"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
             android:hint="Email"
             android:inputType="textEmailAddress"
             android:minHeight="48dp"
