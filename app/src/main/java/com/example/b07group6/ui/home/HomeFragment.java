@@ -48,6 +48,7 @@ import com.example.b07group6.construct.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.search.SearchBar;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -55,11 +56,16 @@ public class HomeFragment extends Fragment {
     private View searchBarContainer;
 
     private List<Artifact> artifactList;
+    private final List<Artifact> displayedArtifacts = new ArrayList<>();
+    private ArtifactAdapter adapter;
+
     private RecyclerView recyclerView;
     private EditText searchEditText;
     private ImageView clearButton;
     private ImageView searchIcon;
     private OnBackPressedCallback backPressedCallback;
+    private User user;
+
 
     public HomeFragment() {
     }
@@ -85,59 +91,20 @@ public class HomeFragment extends Fragment {
         clearButton = view.findViewById(R.id.clearButton);
         searchIcon = view.findViewById(R.id.searchIcon);
         recyclerView = view.findViewById(R.id.recyclerView);
+        user = userViewModel.getCurrentUser();
+
 
         // Extract data from database to populate artifactList...
         FirebaseDatabaseRepository firebase = new FirebaseDatabaseRepository();
 
-        Log.d("FIREBASE STATUSUSUUSUSU", "Firebase is " + ((Boolean)(firebase == null)));
         firebase.getAllArtifacts(new DatabaseRepository.ArtifactListCallback() {
             @Override
             public void onSuccess(List<Artifact> artifacts) {
-                Log.d("Reached", "This piont in code");
                 artifactList = artifacts;
 
-                for (int i = 0; i < artifactList.size(); i++) {
-                    Log.d("Artifact Recieved: ", "Name: "+ artifactList.get(i).getArtifactName());
-                }
                 recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                ArtifactAdapter adapter = new ArtifactAdapter(artifactList, new OnArtifactInteractionListener() {
-                    @Override
-                    public void onSingleClick(int position) {
-                        // Write code to navigate to extended artifact view page for this artifact
-                        userViewModel.setExtendedLotNumber(artifactList.get(position).getLotNumber());
-                        Navigation.findNavController(requireView()).navigate(R.id.action_global_extended);
-                    }
-
-                    @Override
-                    public void onSaveArifactPress(int position) {
-                        // Write code that handles the bookmarking feature for this artifact
-
-                    }
-
-                    @Override
-                    public void onItemLongPress(int position) {
-                        // Write code that creates a highlight and asks for delete.
-                        // If you choose to delete, then handle the delete too...
-                        // You also need to handle the code to de-select the delete if you press elsewhere.
-                        // This feature should only work for admins too...
-
-                        // Here is temp alert box that does the job for now... (not verifying admin)
-                        Artifact artifact = artifactList.get(position);
-                        new AlertDialog.Builder(getContext())
-                                .setTitle(artifact.getArtifactName())
-                                .setItems(new String[]{"Cancel", "Delete"}, (dialog, which) -> {
-                                    switch (which) {
-                                        case 0: /* cancel */
-                                            break;
-                                        case 1:
-                                            artifactList.remove(position);
-                                            // Write code here to handle the artifact deletion in database
-                                            break;
-                                    }
-                                })
-                                .show();
-                    }
-                });
+                OnArtifactInteractionListener artifactInteractionListener = createInteractionListener(artifactList);
+                adapter = new ArtifactAdapter(artifactList, artifactInteractionListener);
 
                 recyclerView.setAdapter(adapter);
             }
@@ -145,15 +112,12 @@ public class HomeFragment extends Fragment {
             @Override
             public void onFailure(String errorMessage) {
                 Toast.makeText(getContext(), "Artifact fetch failed", Toast.LENGTH_SHORT);
-                Log.d("OMG OMG OMG OMG", "SHIT FIREBASE FAILED!" + errorMessage);
             }
         });
 
 
 
-        User user = userViewModel.getCurrentUser();
-
-        generateMenu(true || user.isAdmin()); // Adjust based on if admin
+        generateMenu(user.isAdmin()); // Adjust based on if admin
 
 
         setListeners();
@@ -181,6 +145,45 @@ public class HomeFragment extends Fragment {
                 .addCallback(getViewLifecycleOwner(), backPressedCallback);
     }
 
+    private boolean matchesQuery(Artifact artifact, String query) {
+        if (query.isEmpty()) {
+            return true;
+        }
+        String lowerQuery = query.toLowerCase();
+        String[] fields = {
+                artifact.getLotNumber(),
+                artifact.getArtifactName(),
+                artifact.getDescription(),
+                artifact.getCategory(),
+                artifact.getMaterial(),
+                artifact.getDynastyPeriod(),
+                artifact.getCulturalOrigin(),
+                artifact.getDimensions(),
+                artifact.getConditionReport(),
+                artifact.getCurrentLocation(),
+                artifact.getAcquisitionMethod(),
+                artifact.getProvenance(),
+                artifact.getAccessionNumber(),
+                artifact.getNotes()
+        };
+        for (String field : fields) {
+            if (field != null && field.toLowerCase().contains(query)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void refreshDisplayedList() {
+        String query = searchEditText.getText().toString().trim();
+        displayedArtifacts.clear();
+        for (Artifact artifact : artifactList) {
+            if (matchesQuery(artifact, query)) {
+                displayedArtifacts.add(artifact);
+            }
+        }
+        adapter.notifyDataSetChanged();
+    }
 
     private void setListeners() {
 
@@ -197,11 +200,9 @@ public class HomeFragment extends Fragment {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     clearButton.setVisibility(View.VISIBLE);
-                    bottomNav.setVisibility(View.GONE);
                     backPressedCallback.setEnabled(true);
                 } else {
                     clearButton.setVisibility(View.GONE);
-                    bottomNav.setVisibility(View.VISIBLE);
                     backPressedCallback.setEnabled(false);
                     hideKeyboard();
                 }
@@ -221,6 +222,20 @@ public class HomeFragment extends Fragment {
                     return true;
                 }
                 return false;
+            }
+        });
+
+
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                refreshDisplayedList();
             }
         });
 
@@ -263,26 +278,52 @@ public class HomeFragment extends Fragment {
         if (!isAdmin) {
             menu.removeItem(R.id.nav_add);
         }
-
-//        bottomNav.post(() -> bottomNav.setSelectedItemId(R.id.nav_home));
-//              |--> This line causes errors because of infinite loop of calling the homepage which is bad.
     }
 
-    // The following function is pretty much not needed anymore
-//    private void scrollSpaceAdder(View view){
-//        NestedScrollView scrollView = view.findViewById(R.id.homeScrollView);
-//
-//        bottomNav.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
-//            int navHeight = bottomNav.getHeight();
-//            if (scrollView.getPaddingBottom() != navHeight) {
-//                scrollView.setPadding(
-//                        scrollView.getPaddingLeft(),
-//                        scrollView.getPaddingTop(),
-//                        scrollView.getPaddingRight(),
-//                        navHeight
-//                );
-//            }
-//        });
-//    }
+    private OnArtifactInteractionListener createInteractionListener(List<Artifact> artifactList){
+        return new OnArtifactInteractionListener() {
+            @Override
+            public void onSingleClick(int position) {
+                // Write code to navigate to extended artifact view page for this artifact
+                Artifact artifact  = artifactList.get(position);
+                userViewModel.setExtendedLotNumber(artifact.getLotNumber());
+                Navigation.findNavController(requireView()).navigate(R.id.action_global_extended);
 
+            }
+
+            @Override
+            public void onSaveArifactPress(int position) {
+                // Write code that handles the bookmarking feature for this artifact
+                Artifact artifact = artifactList.get(position);
+
+            }
+
+            @Override
+            public void onItemLongPress(int position) {
+                // Write code that creates a highlight and asks for delete.
+                // If you choose to delete, then handle the delete too...
+                // You also need to handle the code to de-select the delete if you press elsewhere.
+                // This feature should only work for admins too...
+
+                // Here is temp alert box that does the job for now... (not verifying admin)
+                if (!user.isAdmin()){
+                    return;
+                }
+                Artifact artifact = artifactList.get(position);
+                new AlertDialog.Builder(getContext())
+                        .setTitle(artifact.getArtifactName())
+                        .setItems(new String[]{"Cancel", "Delete"}, (dialog, which) -> {
+                            switch (which) {
+                                case 0: /* cancel */
+                                    break;
+                                case 1:
+//                                    artifactList.remove(position);
+                                    // Write code here to handle the artifact deletion in database
+                                    break;
+                            }
+                        })
+                        .show();
+            }
+        };
+    }
 }

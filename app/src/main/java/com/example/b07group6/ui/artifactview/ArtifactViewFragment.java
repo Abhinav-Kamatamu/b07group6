@@ -39,6 +39,10 @@ import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.b07group6.R;
+
+import java.util.ArrayList;
+
 public class ArtifactViewFragment extends Fragment {
 
     private NestedScrollView nestedScrollView;

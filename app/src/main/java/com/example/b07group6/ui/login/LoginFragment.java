@@ -26,6 +26,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class LoginFragment extends Fragment implements LoginContract.View {
     private LoginContract.Presenter presenter;
+    private Button loginButton;
     public static LoginFragment newInstance() {
         return new LoginFragment();
     }
@@ -43,12 +44,13 @@ public class LoginFragment extends Fragment implements LoginContract.View {
 
         EditText emailField = view.findViewById(R.id.email_field);
         EditText passwordField = view.findViewById(R.id.password_field);
-        Button loginButton = view.findViewById(R.id.login_button);
+        loginButton = view.findViewById(R.id.login_button);
         TextView newAccountView = view.findViewById(R.id.create_account_view);
 
-        loginButton.setOnClickListener(v ->
-                presenter.onLoginClicked(emailField.getText().toString(), passwordField.getText().toString())
-        );
+        loginButton.setOnClickListener(v -> {
+            presenter.onLoginClicked(emailField.getText().toString(), passwordField.getText().toString());
+            loginButton.setEnabled(false);
+        });
         newAccountView.setOnClickListener(
                 v -> Navigation.findNavController(view).navigate(R.id.action_create_account)
         );
@@ -61,6 +63,7 @@ public class LoginFragment extends Fragment implements LoginContract.View {
     @Override
     public void showError(String message) {
         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        loginButton.setEnabled(true);
     }
 
     @Override

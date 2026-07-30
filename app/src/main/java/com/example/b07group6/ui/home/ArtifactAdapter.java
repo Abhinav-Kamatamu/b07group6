@@ -1,10 +1,9 @@
 package com.example.b07group6.ui.home;
 
-import android.util.Log;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -88,6 +87,7 @@ public class ArtifactAdapter extends RecyclerView.Adapter<ArtifactAdapter.Artifa
     }
 
     // Create new views (invoked by the layout manager)
+    @NonNull
     @Override
     public ArtifactViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // Create a new view.
@@ -96,15 +96,16 @@ public class ArtifactAdapter extends RecyclerView.Adapter<ArtifactAdapter.Artifa
 
         return new ArtifactViewHolder(view, listener);
     }
-    // END_INCLUDE(recyclerViewOnCreateViewHolder)
 
-    // BEGIN_INCLUDE(recyclerViewOnBindViewHolder)
+
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ArtifactViewHolder viewHolder, final int position) {
         Artifact artifact = artifactList.get(position);
         viewHolder.artifactName.setText(artifact.getArtifactName());
         viewHolder.artifactDescription.setText(artifact.getDescription());
+        Uri imageUrl = Uri.parse(artifact.getImageUrl());
+        viewHolder.artifactImage.setImageURI(imageUrl);
         // Implement a way to get like count and then change the like count here:
         //        viewHolder.artifactLikeCount.setText(<<VALUE TO BE PASSED AS STRING>>);
         // Implement a way to get if toggled and then change the toggle here using an if statement here:
