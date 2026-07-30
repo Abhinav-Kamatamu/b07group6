@@ -52,7 +52,7 @@ public class AddEditArtifactPresenter implements AddEditArtifactContract.Present
         // We only check for uniqueness when we're adding. Not editing
         databaseRepository.checkLotNumberExists(lotNumber, new DatabaseRepository.BooleanCallback() {
             @Override
-            public void onResult(boolean exists) {
+            public void onSuccess(boolean exists) {
                 if (exists) {
                     // We could not save because it already exists
                     view.showSaving(false, true);

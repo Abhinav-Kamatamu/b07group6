@@ -1,5 +1,8 @@
 package com.example.b07group6.backend;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import androidx.annotation.NonNull;
 
 import com.example.b07group6.construct.Artifact;
@@ -26,6 +29,7 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
     private final DatabaseReference likesRef = rootRef.child("likes");
     private final DatabaseReference commentsRef = rootRef.child("comments");
     private final DatabaseReference savedRef = rootRef.child("saved");
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Override
     public void getAllArtifacts(ArtifactListCallback callback) {
@@ -40,12 +44,12 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
                         result.add(artifact);
                     }
                 }
-                callback.onSuccess(result);
+                mainHandler.post(() -> callback.onSuccess(result));
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                callback.onFailure(error.getMessage());
+                mainHandler.post(() -> callback.onFailure(error.getMessage()));
             }
         });
     }
@@ -57,16 +61,16 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Artifact artifact = snapshot.getValue(Artifact.class);
                 if (artifact == null) {
-                    callback.onFailure("Artifact not found.");
+                    mainHandler.post(() -> callback.onFailure("Artifact not found."));
                     return;
                 }
                 artifact.setLotNumber(snapshot.getKey());
-                callback.onSuccess(artifact);
+                mainHandler.post(() -> callback.onSuccess(artifact));
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                callback.onFailure(error.getMessage());
+                mainHandler.post(() -> callback.onFailure(error.getMessage()));
             }
         });
     }
@@ -76,11 +80,11 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
         artifactsRef.child(lotNumber).child("artifactName").get()
                 .addOnCompleteListener(task -> {
                     if (!task.isSuccessful()) {
-                        callback.onFailure("Could not check lot number.");
+                        mainHandler.post(() -> callback.onFailure("Could not check lot number."));
                         return;
                     }
                     DataSnapshot snapshot = task.getResult();
-                    callback.onResult(snapshot != null && snapshot.exists());
+                    mainHandler.post(() -> callback.onSuccess(snapshot != null && snapshot.exists()));
                 });
     }
 
@@ -98,18 +102,21 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
                     if (task.isSuccessful()) {
                         callback.onSuccess();
                     } else {
-                        callback.onFailure("Failed to create artifact.");
+                        mainHandler.post(() -> callback.onFailure("Failed to create artifact."));
                     }
                 });
     }
 
 
-    /** Note: This deletes the artifact and its associated data, but NOT the image  */
+    /**
+     * Note: This deletes the artifact and its associated data, but NOT the image of the artifact.
+     * Please use the SupabaseImageRepository to delete the image first (or at least have the image
+     * url) before deleting the artifact
+     * */
     @Override
     public void deleteArtifact(String lotNumber, SimpleCallback callback) {
         Task<DataSnapshot> commentsTask = commentsRef.child("byLotNumber").child(lotNumber).get();
         Task<DataSnapshot> savedTask = savedRef.child("byLotNumber").child(lotNumber).get();
-
         Tasks.whenAllSuccess(commentsTask, savedTask)
             .addOnSuccessListener(results -> {
                 DataSnapshot commentsSnapshot = (DataSnapshot) results.get(0);
@@ -134,8 +141,10 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
     }
 
     /**
-     * if type == Artifact, then typeID is the lotNumber
-     * if type == Comment, then typeID is the commentID
+     * If you want to get the number of like for an Artifact,
+     * set type = LikeType.ARTIFACT and typeID = lotNumber.
+     * If you want to get the number of like for a Comment,
+     * set type = LikeType.COMMENT and typeID as the commentID
      * */
     @Override
     public void getLikeStatus(LikeType type, String typeID, String uid, LikeStatusCallback callback) {
@@ -146,12 +155,12 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         long count = snapshot.getChildrenCount();
                         boolean liked = snapshot.hasChild(uid);
-                        callback.onResult(count, liked);
+                        mainHandler.post(() -> callback.onSuccess(count, liked));
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        callback.onFailure(error.getMessage());
+                        mainHandler.post(() -> callback.onFailure(error.getMessage()));
                     }
                 });
     }
@@ -176,7 +185,7 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                callback.onFailure(error.getMessage());
+                mainHandler.post(() -> callback.onFailure(error.getMessage()));
             }
         });
     }
@@ -191,14 +200,14 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
                     commentIds.add(child.getKey());
                 }
                 if (commentIds.isEmpty()) {
-                    callback.onSuccess(new ArrayList<>());
+                    mainHandler.post(() -> callback.onSuccess(new ArrayList<>()));
                     return;
                 }
-                List<Task<DataSnapshot>> fetches = new ArrayList<>();
+                List<Task<DataSnapshot>> commentTasks = new ArrayList<>();
                 for (String id : commentIds) {
-                    fetches.add(commentsRef.child("byCommentID").child(id).get());
+                    commentTasks.add(commentsRef.child("byCommentID").child(id).get());
                 }
-                Tasks.whenAllSuccess(fetches)
+                Tasks.whenAllSuccess(commentTasks)
                         .addOnSuccessListener(results -> {
                             List<Comment> result = new ArrayList<>();
                             for (Object obj : results) {
@@ -209,14 +218,14 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
                                     result.add(comment);
                                 }
                             }
-                            callback.onSuccess(result);
+                            mainHandler.post(() -> callback.onSuccess(result));
                         })
-                        .addOnFailureListener(e -> callback.onFailure("Could not load comments."));
+                        .addOnFailureListener(e -> mainHandler.post(() -> callback.onFailure("Could not load comments.")));
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                callback.onFailure(error.getMessage());
+                mainHandler.post(() -> callback.onFailure(error.getMessage()));
             }
         });
     }
@@ -228,16 +237,16 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Comment comment = snapshot.getValue(Comment.class);
                 if (comment == null) {
-                    callback.onFailure("Artifact not found.");
+                    mainHandler.post(() -> callback.onFailure("Artifact not found."));
                     return;
                 }
                 comment.setId(snapshot.getKey());
-                callback.onSuccess(comment);
+                mainHandler.post(() -> callback.onSuccess(comment));
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                callback.onFailure(error.getMessage());
+                mainHandler.post(() -> callback.onFailure(error.getMessage()));
             }
         });
     }
@@ -246,6 +255,7 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
     public void addComment(String lotNumber, String text, String username, String uid, SimpleCallback callback) {
         String newCommentId = commentsRef.child("byCommentID").push().getKey();
         if (newCommentId == null) {
+            // only use mainHandler in asynchronous listeners
             callback.onFailure("Could not generate comment ID.");
             return;
         }
@@ -274,6 +284,26 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
                 .addOnCompleteListener(task -> completeSimple(task, callback));
     }
 
+    /**
+     * if type == Artifact, then typeID is the lotNumber
+     * if type == Comment, then typeID is the commentID
+     * */
+    public void getNumComments(String lotNumber, CommentCountCallback callback) {
+        commentsRef.child("byLotNumber").child(lotNumber)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        long count = snapshot.getChildrenCount();
+                        mainHandler.post(() -> callback.onSuccess(count));
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        mainHandler.post(() -> callback.onFailure(error.getMessage()));
+                    }
+                });
+    }
+
     @Override
     public void getSavedArtifacts(String uid, StringListCallback callback) {
         savedRef.child("byUserID").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -283,12 +313,52 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
                 for (DataSnapshot child : snapshot.getChildren()) {
                     lotNumbers.add(child.getKey());
                 }
-                callback.onSuccess(lotNumbers);
+                mainHandler.post(() -> callback.onSuccess(lotNumbers));
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                callback.onFailure(error.getMessage());
+                mainHandler.post(() -> callback.onFailure(error.getMessage()));
+            }
+        });
+    }
+
+    @Override
+    public void getSavedArtifactsList(String uid, ArtifactListCallback callback) {
+        savedRef.child("byUserID").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<String> lotNumbers = new ArrayList<>();
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    lotNumbers.add(child.getKey());
+                }
+                if (lotNumbers.isEmpty()) {
+                    mainHandler.post(() -> callback.onSuccess(new ArrayList<>()));
+                    return;
+                }
+                List<Task<DataSnapshot>> artifactTasks = new ArrayList<>();
+                for (String lotNumber : lotNumbers) {
+                    artifactTasks.add(artifactsRef.child(lotNumber).get());
+                }
+                Tasks.whenAllSuccess(artifactTasks)
+                        .addOnSuccessListener(results -> {
+                            List<Artifact> result = new ArrayList<>();
+                            for (Object obj : results) {
+                                DataSnapshot artifactSnap = (DataSnapshot) obj;
+                                Artifact artifact = artifactSnap.getValue(Artifact.class);
+                                if (artifact != null) {
+                                    artifact.setLotNumber(artifactSnap.getKey());
+                                    result.add(artifact);
+                                }
+                            }
+                            mainHandler.post(() -> callback.onSuccess(result));
+                        })
+                        .addOnFailureListener(e -> mainHandler.post(() -> callback.onFailure("Could not load artifacts.")));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                mainHandler.post(() -> callback.onFailure(error.getMessage()));
             }
         });
     }
@@ -309,16 +379,16 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                callback.onFailure(error.getMessage());
+                mainHandler.post(() -> callback.onFailure(error.getMessage()));
             }
         });
     }
 
     private void completeSimple(com.google.android.gms.tasks.Task<Void> task, SimpleCallback callback) {
         if (task.isSuccessful()) {
-            callback.onSuccess();
+            mainHandler.post(() -> callback.onSuccess());
         } else {
-            callback.onFailure("Operation failed.");
+            mainHandler.post(() -> callback.onFailure("Operation failed."));
         }
     }
 }

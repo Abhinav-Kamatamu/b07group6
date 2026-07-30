@@ -13,7 +13,7 @@ public interface DatabaseRepository {
     }
 
     interface BooleanCallback {
-        void onResult(boolean result);
+        void onSuccess(boolean result);
         void onFailure(String errorMessage);
     }
 
@@ -38,7 +38,12 @@ public interface DatabaseRepository {
     }
 
     interface LikeStatusCallback {
-        void onResult(long likeCount, boolean likedByCurrentUser);
+        void onSuccess(long likeCount, boolean likedByCurrentUser);
+        void onFailure(String errorMessage);
+    }
+
+    interface CommentCountCallback {
+        void onSuccess(long commentCount);
         void onFailure(String errorMessage);
     }
 
@@ -73,8 +78,10 @@ public interface DatabaseRepository {
     void getComment(String commentID, CommentCallback callback);
     void addComment(String lotNumber, String text, String username, String uid, SimpleCallback callback);
     void deleteComment(String lotNumber, String commentId, SimpleCallback callback);
+    void getNumComments(String lotNumber, CommentCountCallback callback);
 
     // Saved artifacts
     void getSavedArtifacts(String uid, StringListCallback callback);
+    void getSavedArtifactsList(String uid, ArtifactListCallback callback);
     void toggleSaved(String uid, String lotNumber, SimpleCallback callback);
 }

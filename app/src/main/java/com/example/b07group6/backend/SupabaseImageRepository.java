@@ -126,14 +126,14 @@ public class SupabaseImageRepository implements ImageRepository {
         }
 
         if (isBlank(publicUrl) || !publicUrl.contains("/public/")) {
-            mainHandler.post(() -> callback.onError("Could not parse storage path from image URL."));
+            callback.onError("Could not parse storage path from image URL.");
             return;
         }
 
         String deleteUrlString = publicUrl.replaceFirst("/public/", "/");
         HttpUrl deleteUrl = HttpUrl.parse(deleteUrlString);
         if (deleteUrl == null) {
-            mainHandler.post(() -> callback.onError("The supabase URL is invalid."));
+            callback.onError("The supabase URL is invalid.");
             return;
         }
 

@@ -1,5 +1,8 @@
 package com.example.b07group6.backend;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
@@ -10,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FirebaseAuthOperator implements AuthOperator {
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
     @Override
     public void signIn(String email, String password, AuthCallback callback) {
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
@@ -17,21 +21,21 @@ public class FirebaseAuthOperator implements AuthOperator {
                     Exception authException = authTask.getException();
                     if (authException instanceof FirebaseAuthException) {
                         String errorCode = ((FirebaseAuthException) authException).getErrorCode();
-                        callback.onFailure(errorCode + " " + authException.getMessage());
+                        mainHandler.post(() -> callback.onFailure(errorCode + " " + authException.getMessage()));
                         return;
                     } else if (authException != null) {
-                        callback.onFailure("Unexpected Error: " + authException.getMessage());
+                        mainHandler.post(() -> callback.onFailure("Unexpected Error: " + authException.getMessage()));
                         return;
                     } else if (!authTask.isSuccessful()) {
-                        callback.onFailure("Could not sign in");
+                        mainHandler.post(() -> callback.onFailure("Could not sign in"));
                         return;
                     }
                     FirebaseUser firebaseUser = authTask.getResult().getUser();
                     if (firebaseUser == null) {
-                        callback.onFailure("Could not sign in");
+                        mainHandler.post(() -> callback.onFailure("Could not sign in"));
                         return;
                     }
-                    callback.onSuccess(firebaseUser.getUid());
+                    mainHandler.post(() -> callback.onSuccess(firebaseUser.getUid()));
                 });
     }
     @Override
@@ -40,13 +44,13 @@ public class FirebaseAuthOperator implements AuthOperator {
                 .get()
                 .addOnCompleteListener(dbTask -> {
                     if (!dbTask.isSuccessful() || dbTask.getResult() == null || !dbTask.getResult().exists()) {
-                        callback.onFailure("Could not load user data");
+                        mainHandler.post(() -> callback.onFailure("Could not load user data"));
                         return;
                     }
                     DataSnapshot snapshot = dbTask.getResult();
                     String username = snapshot.child("username").getValue(String.class);
                     Boolean isAdmin = snapshot.child("isAdmin").getValue(Boolean.class);
-                    callback.onSuccess(username, isAdmin != null && isAdmin);
+                    mainHandler.post(() -> callback.onSuccess(username, isAdmin != null && isAdmin));
                 });
     }
     @Override
@@ -56,21 +60,21 @@ public class FirebaseAuthOperator implements AuthOperator {
                     Exception authException = authTask.getException();
                     if (authException instanceof FirebaseAuthException) {
                         String errorCode = ((FirebaseAuthException) authException).getErrorCode();
-                        callback.onFailure(errorCode + " " + authException.getMessage());
+                        mainHandler.post(() -> callback.onFailure(errorCode + " " + authException.getMessage()));
                         return;
                     } else if (authException != null) {
-                        callback.onFailure("Unexpected Error: " + authException.getMessage());
+                        mainHandler.post(() -> callback.onFailure("Unexpected Error: " + authException.getMessage()));
                         return;
                     } else if (!authTask.isSuccessful()) {
-                        callback.onFailure("Could not create account");
+                        mainHandler.post(() -> callback.onFailure("Could not create account"));
                         return;
                     }
                     FirebaseUser firebaseUser = authTask.getResult().getUser();
                     if (firebaseUser == null) {
-                        callback.onFailure("Could not create account");
+                        mainHandler.post(() -> callback.onFailure("Could not create account"));
                         return;
                     }
-                    callback.onSuccess(firebaseUser.getUid());
+                    mainHandler.post(() -> callback.onSuccess(firebaseUser.getUid()));
                 });
     }
     @Override
@@ -84,10 +88,10 @@ public class FirebaseAuthOperator implements AuthOperator {
                 .setValue(userRecord)
                 .addOnCompleteListener(writeTask -> {
                     if (!writeTask.isSuccessful()) {
-                        callback.onFailure("Could not save user record");
+                        mainHandler.post(() -> callback.onFailure("Could not save user record"));
                         return;
                     }
-                    callback.onSuccess(uid);
+                    mainHandler.post(() -> callback.onSuccess(uid));
                 });
     }
 }
