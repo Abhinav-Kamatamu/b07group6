@@ -1,5 +1,6 @@
 package com.example.b07group6.ui.home;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -35,22 +36,39 @@ import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
+import com.example.b07group6.MainActivity;
 import com.example.b07group6.R;
+import com.example.b07group6.backend.DatabaseRepository;
+import com.example.b07group6.backend.FirebaseDatabaseRepository;
+import com.example.b07group6.construct.Artifact;
 import com.example.b07group6.shared.UserViewModel;
 import com.example.b07group6.construct.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.search.SearchBar;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HomeFragment extends Fragment {
     private BottomNavigationView bottomNav;
     private View searchBarContainer;
+
+    private List<Artifact> artifactList;
+    private final List<Artifact> displayedArtifacts = new ArrayList<>();
+    private ArtifactAdapter adapter;
+
+    private RecyclerView recyclerView;
     private EditText searchEditText;
     private ImageView clearButton;
     private ImageView searchIcon;
     private OnBackPressedCallback backPressedCallback;
+    private User user;
 
-    public HomeFragment() {}
+
+    public HomeFragment() {
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -72,14 +90,40 @@ public class HomeFragment extends Fragment {
         searchEditText = view.findViewById(R.id.searchEditText);
         clearButton = view.findViewById(R.id.clearButton);
         searchIcon = view.findViewById(R.id.searchIcon);
+        recyclerView = view.findViewById(R.id.recyclerView);
+        user = userViewModel.getCurrentUser();
 
 
-        User user = userViewModel.getCurrentUser();
+        // Extract data from database to populate artifactList...
+        FirebaseDatabaseRepository firebase = new FirebaseDatabaseRepository();
 
-        generateMenu(true || user.isAdmin()); // Adjust based on if admin
+        firebase.getAllArtifacts(new DatabaseRepository.ArtifactListCallback() {
+            @Override
+            public void onSuccess(List<Artifact> artifacts) {
+                artifactList = artifacts;
+
+                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                OnArtifactInteractionListener artifactInteractionListener = createInteractionListener(artifactList);
+                adapter = new ArtifactAdapter(artifactList, artifactInteractionListener);
+
+                recyclerView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Toast.makeText(getContext(), "Artifact fetch failed", Toast.LENGTH_SHORT);
+            }
+        });
+
+
+
+        generateMenu(user.isAdmin()); // Adjust based on if admin
 
 
         setListeners();
+
+
+
 
         // Scroll Space Adder has been disaled becasue we changed to Reletive Layout in activity_main.xml
 //        scrollSpaceAdder(view);
@@ -101,8 +145,47 @@ public class HomeFragment extends Fragment {
                 .addCallback(getViewLifecycleOwner(), backPressedCallback);
     }
 
+    private boolean matchesQuery(Artifact artifact, String query) {
+        if (query.isEmpty()) {
+            return true;
+        }
+        String lowerQuery = query.toLowerCase();
+        String[] fields = {
+                artifact.getLotNumber(),
+                artifact.getArtifactName(),
+                artifact.getDescription(),
+                artifact.getCategory(),
+                artifact.getMaterial(),
+                artifact.getDynastyPeriod(),
+                artifact.getCulturalOrigin(),
+                artifact.getDimensions(),
+                artifact.getConditionReport(),
+                artifact.getCurrentLocation(),
+                artifact.getAcquisitionMethod(),
+                artifact.getProvenance(),
+                artifact.getAccessionNumber(),
+                artifact.getNotes()
+        };
+        for (String field : fields) {
+            if (field != null && field.toLowerCase().contains(query)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-    private void setListeners(){
+    private void refreshDisplayedList() {
+        String query = searchEditText.getText().toString().trim();
+        displayedArtifacts.clear();
+        for (Artifact artifact : artifactList) {
+            if (matchesQuery(artifact, query)) {
+                displayedArtifacts.add(artifact);
+            }
+        }
+        adapter.notifyDataSetChanged();
+    }
+
+    private void setListeners() {
 
         clearButton.setVisibility(View.GONE);
 
@@ -115,13 +198,11 @@ public class HomeFragment extends Fragment {
         searchEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if(hasFocus){
+                if (hasFocus) {
                     clearButton.setVisibility(View.VISIBLE);
-                    bottomNav.setVisibility(View.GONE);
                     backPressedCallback.setEnabled(true);
-                }else{
+                } else {
                     clearButton.setVisibility(View.GONE);
-                    bottomNav.setVisibility(View.VISIBLE);
                     backPressedCallback.setEnabled(false);
                     hideKeyboard();
                 }
@@ -144,10 +225,24 @@ public class HomeFragment extends Fragment {
             }
         });
 
+
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                refreshDisplayedList();
+            }
+        });
+
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(searchEditText.getText().toString().isEmpty()){
+                if (searchEditText.getText().toString().isEmpty()) {
                     searchEditText.clearFocus();
                     clearButton.setVisibility(View.GONE);
                     return;
@@ -156,8 +251,9 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
     private void showKeyboard() {
-        InputMethodManager imm = (InputMethodManager)requireContext()
+        InputMethodManager imm = (InputMethodManager) requireContext()
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
 
         if (imm != null) {
@@ -174,87 +270,58 @@ public class HomeFragment extends Fragment {
     }
 
 
-    private void generateMenu(boolean isAdmin){
+    private void generateMenu(boolean isAdmin) {
         bottomNav.setVisibility(View.VISIBLE);
         Menu menu = bottomNav.getMenu();
         menu.findItem(R.id.nav_home).setChecked(true);
 
-        if(!isAdmin){
+        if (!isAdmin) {
             menu.removeItem(R.id.nav_add);
         }
-
-//        bottomNav.post(() -> bottomNav.setSelectedItemId(R.id.nav_home));
-//              |--> This line causes errors because of infinite loop of calling the homepage which is bad.
     }
 
-    private void scrollSpaceAdder(View view){
-        NestedScrollView scrollView = view.findViewById(R.id.homeScrollView);
+    private OnArtifactInteractionListener createInteractionListener(List<Artifact> artifactList){
+        return new OnArtifactInteractionListener() {
+            @Override
+            public void onSingleClick(int position) {
+                // Write code to navigate to extended artifact view page for this artifact
+                Artifact artifact  = artifactList.get(position);
 
-        bottomNav.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
-            int navHeight = bottomNav.getHeight();
-            if (scrollView.getPaddingBottom() != navHeight) {
-                scrollView.setPadding(
-                        scrollView.getPaddingLeft(),
-                        scrollView.getPaddingTop(),
-                        scrollView.getPaddingRight(),
-                        navHeight
-                );
             }
-        });
+
+            @Override
+            public void onSaveArifactPress(int position) {
+                // Write code that handles the bookmarking feature for this artifact
+                Artifact artifact = artifactList.get(position);
+
+            }
+
+            @Override
+            public void onItemLongPress(int position) {
+                // Write code that creates a highlight and asks for delete.
+                // If you choose to delete, then handle the delete too...
+                // You also need to handle the code to de-select the delete if you press elsewhere.
+                // This feature should only work for admins too...
+
+                // Here is temp alert box that does the job for now... (not verifying admin)
+                if (!user.isAdmin()){
+                    return;
+                }
+                Artifact artifact = artifactList.get(position);
+                new AlertDialog.Builder(getContext())
+                        .setTitle(artifact.getArtifactName())
+                        .setItems(new String[]{"Cancel", "Delete"}, (dialog, which) -> {
+                            switch (which) {
+                                case 0: /* cancel */
+                                    break;
+                                case 1:
+//                                    artifactList.remove(position);
+                                    // Write code here to handle the artifact deletion in database
+                                    break;
+                            }
+                        })
+                        .show();
+            }
+        };
     }
 }
-
-/*
-
-// 1. Get reference to your SearchView
-android.widget.SearchView searchView = view.findViewById(R.id.searchView);
-
-// 2. Make the entire circular bar clickable to open typing mode
-        searchView.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View v) {
-        searchView.setIconified(false); // Expands the search view and brings up keyboard
-    }
-});
-
-
-// 3. Handle the back press behavior (requires AndroidX AppCompatActivity)
-// 3. Handle the back press behavior
-
-requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
-    @Override
-    public void handleOnBackPressed() {
-        View rootLayout = view.findViewById(R.id.coordinator_layout);
-
-        // 1. Check if the keyboard is actually open/visible on screen
-        boolean isKeyboardOpen = androidx.core.view.WindowInsetsCompat.toWindowInsetsCompat(
-                requireActivity().getWindow().getDecorView().getRootWindowInsets()
-        ).isVisible(androidx.core.view.WindowInsetsCompat.Type.ime());
-
-        if (searchView.hasFocus() && isKeyboardOpen) {
-            // PRESS 1: Keyboard is open. Close it, but keep the cursor.
-            android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager)
-                    requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
-            if (imm != null) {
-                imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
-            }
-        }
-        else if (searchView.hasFocus()) {
-            // PRESS 2: Keyboard is already closed, but cursor is still blinking.
-            // Move focus to the root layout to strip the cursor, keeping the text intact.
-            if (rootLayout != null) {
-                rootLayout.setFocusableInTouchMode(true);
-                rootLayout.requestFocus();
-            }
-            searchView.clearFocus();
-        }
-        else {
-            // PRESS 3: Search bar has no focus/cursor. Clean exit.
-            setEnabled(false);
-            requireActivity().getOnBackPressedDispatcher().onBackPressed();
-            setEnabled(true);
-        }
-    }
-});
-
- */

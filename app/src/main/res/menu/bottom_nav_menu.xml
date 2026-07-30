@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_saved"
-        android:icon="@drawable/ic_bookmark"
+        android:icon="@drawable/ic_bookmark_off"
         android:title="Saved" />
 
     <!-- This tab will only show for User Type A -->
