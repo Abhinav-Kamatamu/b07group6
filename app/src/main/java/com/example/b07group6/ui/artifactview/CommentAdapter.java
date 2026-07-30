@@ -35,11 +35,11 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.MyViewHo
     public void onBindViewHolder(@NonNull CommentAdapter.MyViewHolder holder, int position) {
         holder.username.setText(commentList.get(position).getUsername());
         holder.commentBodyText.setText(commentList.get(position).getText());
-        long firebaseTime = commentList.get(position).getTimestamp();
+        Long firebaseTime = commentList.get(position).getTimestamp();
         // get time in relative format (e.g. 5 mins ago)
         if (firebaseTime != null) {
             String relativeTimeString = DateUtils.getRelativeTimeSpanString(
-                    firebaseTime.toDate().getTime(),
+                    firebaseTime,
                     System.currentTimeMillis(),
                     DateUtils.SECOND_IN_MILLIS,
                     DateUtils.FORMAT_ABBREV_RELATIVE

@@ -103,7 +103,7 @@ public class HomeFragment extends Fragment {
                 artifactList = artifacts;
 
                 recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                OnArtifactInteractionListener artifactInteractionListener = createInteractionListener(artifactList);
+                OnArtifactInteractionListener artifactInteractionListener = createInteractionListener(userViewModel, artifactList);
                 adapter = new ArtifactAdapter(artifactList, artifactInteractionListener);
 
                 recyclerView.setAdapter(adapter);
@@ -280,7 +280,7 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private OnArtifactInteractionListener createInteractionListener(List<Artifact> artifactList){
+    private OnArtifactInteractionListener createInteractionListener(UserViewModel userViewModel, List<Artifact> artifactList){
         return new OnArtifactInteractionListener() {
             @Override
             public void onSingleClick(int position) {

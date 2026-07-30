@@ -214,7 +214,7 @@ public class ArtifactViewFragment extends Fragment {
         artifactDynastyPeriod.setText(artifact.getDynastyPeriod());
         Glide.with(getContext()).load(artifact.getImageUrl()).error(R.drawable.ic_launcher_background).into(artifactImage);
         descriptionText.setText(artifact.getDescription());
-        databaseRepository.getComments(lotNumber, new DatabaseRepository.CommentListCallback() {
+        databaseRepository.getAllComments(lotNumber, new DatabaseRepository.CommentListCallback() {
             @Override
             public void onSuccess(List<Comment> comments) {
                 commentList = comments;

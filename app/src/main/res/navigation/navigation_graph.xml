@@ -32,8 +32,6 @@
     <action
         android:id="@+id/action_global_extended"
         app:launchSingleTop="true"
-        app:popUpTo="@id/navigation_graph"
-        app:popUpToInclusive="false"
         app:destination="@id/extendedArtifactFragment" />
 
     <!-- LoginFragment -->
@@ -114,8 +112,6 @@
         <!-- Transition to HomeFragment -->
         <action
             android:id="@+id/action_extended_artifact_to_home"
-            app:destination="@id/homeFragment"
-            app:popUpTo="@id/extendedArtifactFragment"
-            app:popUpToInclusive="true" />
+            app:destination="@id/homeFragment" />
     </fragment>
 </navigation>

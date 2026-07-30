@@ -49,7 +49,9 @@ public class LoginFragment extends Fragment implements LoginContract.View {
 
         loginButton.setOnClickListener(v -> {
             presenter.onLoginClicked(emailField.getText().toString(), passwordField.getText().toString());
-            loginButton.setEnabled(false);
+            if (!emailField.getText().toString().isEmpty() && !passwordField.getText().toString().isEmpty()) {
+                loginButton.setEnabled(false);
+            }
         });
         newAccountView.setOnClickListener(
                 v -> Navigation.findNavController(view).navigate(R.id.action_create_account)
@@ -57,7 +59,6 @@ public class LoginFragment extends Fragment implements LoginContract.View {
 
         BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
         bottomNav.setVisibility(View.GONE);
-        presenter.onLoginClicked("abhinav.kamatamu@gmail.com", "Abhinav");
     }
 
     @Override
