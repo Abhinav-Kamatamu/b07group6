@@ -64,6 +64,7 @@ public class HomeFragment extends Fragment {
     private ImageView clearButton;
     private ImageView searchIcon;
     private OnBackPressedCallback backPressedCallback;
+    private User user;
 
 
     public HomeFragment() {
@@ -90,55 +91,20 @@ public class HomeFragment extends Fragment {
         clearButton = view.findViewById(R.id.clearButton);
         searchIcon = view.findViewById(R.id.searchIcon);
         recyclerView = view.findViewById(R.id.recyclerView);
+        user = userViewModel.getCurrentUser();
+
 
         // Extract data from database to populate artifactList...
         FirebaseDatabaseRepository firebase = new FirebaseDatabaseRepository();
 
-        Log.d("FIREBASE STATUSUSUUSUSU", "Firebase is " + ((Boolean)(firebase == null)));
         firebase.getAllArtifacts(new DatabaseRepository.ArtifactListCallback() {
             @Override
             public void onSuccess(List<Artifact> artifacts) {
                 artifactList = artifacts;
-                displayedArtifacts.clear();
-                displayedArtifacts.addAll(artifactList);
 
                 recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                adapter = new ArtifactAdapter(displayedArtifacts, new OnArtifactInteractionListener() {
-                    @Override
-                    public void onSingleClick(int position) {
-                        // Write code to navigate to extended artifact view page for this artifact
-                    }
-
-                    @Override
-                    public void onSaveArifactPress(int position) {
-                        // Write code that handles the bookmarking feature for this artifact
-
-                    }
-
-                    @Override
-                    public void onItemLongPress(int position) {
-                        // Write code that creates a highlight and asks for delete.
-                        // If you choose to delete, then handle the delete too...
-                        // You also need to handle the code to de-select the delete if you press elsewhere.
-                        // This feature should only work for admins too...
-
-                        // Here is temp alert box that does the job for now... (not verifying admin)
-                        Artifact artifact = artifactList.get(position);
-                        new AlertDialog.Builder(getContext())
-                                .setTitle(artifact.getArtifactName())
-                                .setItems(new String[]{"Cancel", "Delete"}, (dialog, which) -> {
-                                    switch (which) {
-                                        case 0: /* cancel */
-                                            break;
-                                        case 1:
-                                            artifactList.remove(position);
-                                            // Write code here to handle the artifact deletion in database
-                                            break;
-                                    }
-                                })
-                                .show();
-                    }
-                });
+                OnArtifactInteractionListener artifactInteractionListener = createInteractionListener(artifactList);
+                adapter = new ArtifactAdapter(artifactList, artifactInteractionListener);
 
                 recyclerView.setAdapter(adapter);
             }
@@ -146,15 +112,12 @@ public class HomeFragment extends Fragment {
             @Override
             public void onFailure(String errorMessage) {
                 Toast.makeText(getContext(), "Artifact fetch failed", Toast.LENGTH_SHORT);
-                Log.d("OMG OMG OMG OMG", "SHIT FIREBASE FAILED!" + errorMessage);
             }
         });
 
 
 
-        User user = userViewModel.getCurrentUser();
-
-        generateMenu(true || user.isAdmin()); // Adjust based on if admin
+        generateMenu(user.isAdmin()); // Adjust based on if admin
 
 
         setListeners();
@@ -237,11 +200,9 @@ public class HomeFragment extends Fragment {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     clearButton.setVisibility(View.VISIBLE);
-                    bottomNav.setVisibility(View.GONE);
                     backPressedCallback.setEnabled(true);
                 } else {
                     clearButton.setVisibility(View.GONE);
-                    bottomNav.setVisibility(View.VISIBLE);
                     backPressedCallback.setEnabled(false);
                     hideKeyboard();
                 }
@@ -263,6 +224,7 @@ public class HomeFragment extends Fragment {
                 return false;
             }
         });
+
 
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -316,26 +278,50 @@ public class HomeFragment extends Fragment {
         if (!isAdmin) {
             menu.removeItem(R.id.nav_add);
         }
-
-//        bottomNav.post(() -> bottomNav.setSelectedItemId(R.id.nav_home));
-//              |--> This line causes errors because of infinite loop of calling the homepage which is bad.
     }
 
-    // The following function is pretty much not needed anymore
-//    private void scrollSpaceAdder(View view){
-//        NestedScrollView scrollView = view.findViewById(R.id.homeScrollView);
-//
-//        bottomNav.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
-//            int navHeight = bottomNav.getHeight();
-//            if (scrollView.getPaddingBottom() != navHeight) {
-//                scrollView.setPadding(
-//                        scrollView.getPaddingLeft(),
-//                        scrollView.getPaddingTop(),
-//                        scrollView.getPaddingRight(),
-//                        navHeight
-//                );
-//            }
-//        });
-//    }
+    private OnArtifactInteractionListener createInteractionListener(List<Artifact> artifactList){
+        return new OnArtifactInteractionListener() {
+            @Override
+            public void onSingleClick(int position) {
+                // Write code to navigate to extended artifact view page for this artifact
+                Artifact artifact  = artifactList.get(position);
 
+            }
+
+            @Override
+            public void onSaveArifactPress(int position) {
+                // Write code that handles the bookmarking feature for this artifact
+                Artifact artifact = artifactList.get(position);
+
+            }
+
+            @Override
+            public void onItemLongPress(int position) {
+                // Write code that creates a highlight and asks for delete.
+                // If you choose to delete, then handle the delete too...
+                // You also need to handle the code to de-select the delete if you press elsewhere.
+                // This feature should only work for admins too...
+
+                // Here is temp alert box that does the job for now... (not verifying admin)
+                if (!user.isAdmin()){
+                    return;
+                }
+                Artifact artifact = artifactList.get(position);
+                new AlertDialog.Builder(getContext())
+                        .setTitle(artifact.getArtifactName())
+                        .setItems(new String[]{"Cancel", "Delete"}, (dialog, which) -> {
+                            switch (which) {
+                                case 0: /* cancel */
+                                    break;
+                                case 1:
+//                                    artifactList.remove(position);
+                                    // Write code here to handle the artifact deletion in database
+                                    break;
+                            }
+                        })
+                        .show();
+            }
+        };
+    }
 }
