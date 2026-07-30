@@ -2,6 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="gray">#FFE8E8E8</color>
 
     <!-- Primary palette -->
     <color name="primary">#8B2131</color>
