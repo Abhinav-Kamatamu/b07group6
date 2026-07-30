@@ -127,7 +127,9 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
                 updates.put("likes/forArtifacts/" + lotNumber, null);
                 updates.put("comments/byLotNumber/" + lotNumber, null);
                 for (DataSnapshot child : commentsSnapshot.getChildren()) {
-                    updates.put("comments/byCommentID/" + child.getKey(), null);
+                    String commentID = child.getKey();
+                    updates.put("comments/byCommentID/" + commentID, null);
+                    updates.put("likes/forComments/" + commentID, null);
                 }
                 updates.put("saved/byLotNumber/" + lotNumber, null);
                 for (DataSnapshot child : savedSnapshot.getChildren()) {
@@ -269,6 +271,7 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
         Map<String, Object> updates = new HashMap<>();
         updates.put("byCommentID/" + newCommentId, comment);
         updates.put("byLotNumber/" + lotNumber + "/" + newCommentId, true);
+        updates.put("likes/forComments/" + newCommentId + "/count", 0);
 
         commentsRef.updateChildren(updates)
                 .addOnCompleteListener(task -> completeSimple(task, callback));
