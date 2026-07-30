@@ -121,7 +121,7 @@ public class SupabaseImageRepository implements ImageRepository {
                 isBlank(BuildConfig.SUPABASE_URL) || isBlank(BuildConfig.SUPABASE_ANON_KEY)
                 || isBlank(BuildConfig.SUPABASE_IMAGE_BUCKET)
         ) {
-            callback.onError("Image deleter not configured with URL, anon key, and bucket name");
+            mainHandler.post(() -> callback.onError("Image deleter not configured with URL, anon key, and bucket name"));
             return;
         }
 
