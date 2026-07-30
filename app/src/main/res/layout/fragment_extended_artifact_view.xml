@@ -98,7 +98,7 @@
                 android:drawableLeft="@drawable/ic_comment"
                 android:paddingLeft="0dp"
                 android:text="2.2M"
-                android:textColor="@color/black" />
+                android:textColor="@color/text_primary" />
 
         </LinearLayout>
 
@@ -141,7 +141,7 @@
             android:padding="4dp"
             android:text="View more"
             android:textStyle="bold"
-            android:textColor="#0066CC"
+            android:textColor="@color/primary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/descriptionText" />
 
@@ -154,7 +154,7 @@
             android:layout_marginStart="30dp"
             android:layout_marginEnd="30dp"
             android:layout_marginTop="20dp"
-            android:background="#E0E0E0"
+            android:background="@color/text_secondary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/viewMoreButton" />
@@ -171,7 +171,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/commentsDivider" />
 
-        <!-- Placeholder container — populate later with a RecyclerView or comment rows -->
         <LinearLayout
             android:id="@+id/inputCommentSection"
             android:layout_width="wrap_content"
@@ -196,7 +195,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginStart="15dp"
-                app:backgroundTint="@color/black"
+                app:backgroundTint="@color/primary"
                 android:text="Comment"
                 android:layout_gravity="center"
                 app:cornerRadius="50dp"

@@ -1,5 +1,7 @@
 package com.example.b07group6.backend;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.example.b07group6.construct.Artifact;
@@ -148,11 +150,13 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
 
     @Override
     public void getComments(String lotNumber, CommentListCallback callback) {
+        Log.d("FireBase getComments", "Trying to fetch comments");
         commentsRef.child(lotNumber).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 List<Comment> result = new ArrayList<>();
                 for (DataSnapshot child : snapshot.getChildren()) {
+                    Log.d("getComments for loop", "How many times does this run?");
                     Comment comment = child.getValue(Comment.class);
                     if (comment != null) {
                         comment.setId(child.getKey());

@@ -55,6 +55,7 @@ public class LoginFragment extends Fragment implements LoginContract.View {
 
         BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
         bottomNav.setVisibility(View.GONE);
+        presenter.onLoginClicked("abhinav.kamatamu@gmail.com", "Abhinav");
     }
 
     @Override
