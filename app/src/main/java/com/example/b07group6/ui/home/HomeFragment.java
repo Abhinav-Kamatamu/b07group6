@@ -48,6 +48,7 @@ import com.example.b07group6.construct.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.search.SearchBar;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -55,11 +56,15 @@ public class HomeFragment extends Fragment {
     private View searchBarContainer;
 
     private List<Artifact> artifactList;
+    private final List<Artifact> displayedArtifacts = new ArrayList<>();
+    private ArtifactAdapter adapter;
+
     private RecyclerView recyclerView;
     private EditText searchEditText;
     private ImageView clearButton;
     private ImageView searchIcon;
     private OnBackPressedCallback backPressedCallback;
+
 
     public HomeFragment() {
     }
@@ -93,14 +98,12 @@ public class HomeFragment extends Fragment {
         firebase.getAllArtifacts(new DatabaseRepository.ArtifactListCallback() {
             @Override
             public void onSuccess(List<Artifact> artifacts) {
-                Log.d("Reached", "This piont in code");
                 artifactList = artifacts;
+                displayedArtifacts.clear();
+                displayedArtifacts.addAll(artifactList);
 
-                for (int i = 0; i < artifactList.size(); i++) {
-                    Log.d("Artifact Recieved: ", "Name: "+ artifactList.get(i).getArtifactName());
-                }
                 recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                ArtifactAdapter adapter = new ArtifactAdapter(artifactList, new OnArtifactInteractionListener() {
+                adapter = new ArtifactAdapter(displayedArtifacts, new OnArtifactInteractionListener() {
                     @Override
                     public void onSingleClick(int position) {
                         // Write code to navigate to extended artifact view page for this artifact
@@ -179,6 +182,45 @@ public class HomeFragment extends Fragment {
                 .addCallback(getViewLifecycleOwner(), backPressedCallback);
     }
 
+    private boolean matchesQuery(Artifact artifact, String query) {
+        if (query.isEmpty()) {
+            return true;
+        }
+        String lowerQuery = query.toLowerCase();
+        String[] fields = {
+                artifact.getLotNumber(),
+                artifact.getArtifactName(),
+                artifact.getDescription(),
+                artifact.getCategory(),
+                artifact.getMaterial(),
+                artifact.getDynastyPeriod(),
+                artifact.getCulturalOrigin(),
+                artifact.getDimensions(),
+                artifact.getConditionReport(),
+                artifact.getCurrentLocation(),
+                artifact.getAcquisitionMethod(),
+                artifact.getProvenance(),
+                artifact.getAccessionNumber(),
+                artifact.getNotes()
+        };
+        for (String field : fields) {
+            if (field != null && field.toLowerCase().contains(query)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void refreshDisplayedList() {
+        String query = searchEditText.getText().toString().trim();
+        displayedArtifacts.clear();
+        for (Artifact artifact : artifactList) {
+            if (matchesQuery(artifact, query)) {
+                displayedArtifacts.add(artifact);
+            }
+        }
+        adapter.notifyDataSetChanged();
+    }
 
     private void setListeners() {
 
@@ -219,6 +261,19 @@ public class HomeFragment extends Fragment {
                     return true;
                 }
                 return false;
+            }
+        });
+
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                refreshDisplayedList();
             }
         });
 
