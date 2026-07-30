@@ -1,5 +1,6 @@
 package com.example.b07group6.backend;
 
+import android.util.Log;
 import android.os.Handler;
 import android.os.Looper;
 

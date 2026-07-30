@@ -1,5 +1,8 @@
 package com.example.b07group6.construct;
 
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.ServerTimestamp;
+
 public class Comment {
     private String id;       // set manually after reading, not stored in DB
     private String text;
@@ -11,10 +14,11 @@ public class Comment {
         // required no-arg constructor for Firebase deserialization
     }
 
-    public Comment(String text, String username, String uid) {
+    public Comment(String text, String username, String uid, Long timestamp) {
         this.text = text;
         this.username = username;
         this.uid = uid;
+        this.timestamp = timestamp;
     }
 
     public String getId() { return id; }
@@ -28,4 +32,7 @@ public class Comment {
 
     public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
+
+    public Long getTimestamp() { return timestamp; }
+    public void setTimestamp(Long timestamp) { this.timestamp = timestamp; }
 }

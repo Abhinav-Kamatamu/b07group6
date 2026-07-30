@@ -286,6 +286,8 @@ public class HomeFragment extends Fragment {
             public void onSingleClick(int position) {
                 // Write code to navigate to extended artifact view page for this artifact
                 Artifact artifact  = artifactList.get(position);
+                userViewModel.setExtendedLotNumber(artifact.getLotNumber());
+                Navigation.findNavController(requireView()).navigate(R.id.action_global_extended);
 
             }
 

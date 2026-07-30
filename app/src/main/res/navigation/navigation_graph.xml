@@ -34,7 +34,7 @@
         app:launchSingleTop="true"
         app:popUpTo="@id/navigation_graph"
         app:popUpToInclusive="false"
-        app:destination="@id/homeFragment" />
+        app:destination="@id/extendedArtifactFragment" />
 
     <!-- LoginFragment -->
     <fragment
@@ -105,11 +105,17 @@
             app:popUpTo="@id/profileFragment"
             app:popUpToInclusive="true" />
     </fragment>
-
+    <!--  Extended Artifact View Fragment  -->
     <fragment
         android:id="@+id/extendedArtifactFragment"
         android:name="com.example.b07group6.ui.artifactview.ArtifactViewFragment"
         android:label="Extended Artifact View"
         tools:layout="@layout/fragment_extended_artifact_view">
+        <!-- Transition to HomeFragment -->
+        <action
+            android:id="@+id/action_extended_artifact_to_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/extendedArtifactFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 </navigation>

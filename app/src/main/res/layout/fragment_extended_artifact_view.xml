@@ -28,12 +28,12 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:layout_marginTop="20dp"
-            android:text="ARTIFACT NAME"
+            android:text="DEFAULT NAME"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/artifactImage" />
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/artifactCategory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
@@ -43,34 +43,34 @@
             app:layout_constraintTop_toBottomOf="@+id/artifactName" />
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/artifactMaterial"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="20dp"
             android:text="MATERIAL"
-            app:layout_constraintStart_toEndOf="@+id/textView4"
+            app:layout_constraintStart_toEndOf="@+id/artifactCategory"
             app:layout_constraintTop_toBottomOf="@+id/artifactName" />
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/artifactDynastyPeriod"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:layout_marginTop="10dp"
             android:text="DYNASTY/PERIOD"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView5" />
+            app:layout_constraintTop_toBottomOf="@+id/artifactMaterial" />
 
         <LinearLayout
-            android:id="@+id/linearLayout"
+            android:id="@+id/counts"
             android:layout_width="wrap_content"
-            android:layout_height="75dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginTop="10dp"
             android:orientation="horizontal"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView6">
+            app:layout_constraintTop_toBottomOf="@+id/artifactDynastyPeriod">
 
             <CheckBox
                 android:id="@+id/likesButtonAndCount"
@@ -98,7 +98,7 @@
                 android:drawableLeft="@drawable/ic_comment"
                 android:paddingLeft="0dp"
                 android:text="2.2M"
-                android:textColor="@color/black" />
+                android:textColor="@color/text_primary" />
 
         </LinearLayout>
 
@@ -114,7 +114,7 @@
             android:textSize="18sp"
             android:textStyle="bold|italic"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+            app:layout_constraintTop_toBottomOf="@+id/counts" />
 
         <TextView
             android:id="@+id/descriptionText"
@@ -141,7 +141,7 @@
             android:padding="4dp"
             android:text="View more"
             android:textStyle="bold"
-            android:textColor="#0066CC"
+            android:textColor="@color/primary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/descriptionText" />
 
@@ -154,7 +154,7 @@
             android:layout_marginStart="30dp"
             android:layout_marginEnd="30dp"
             android:layout_marginTop="20dp"
-            android:background="#E0E0E0"
+            android:background="@color/text_secondary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/viewMoreButton" />
@@ -163,7 +163,7 @@
             android:id="@+id/commentsHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
+            android:layout_marginStart="30dp"
             android:layout_marginTop="16dp"
             android:text="Comments"
             android:textSize="18sp"
@@ -171,7 +171,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/commentsDivider" />
 
-        <!-- Placeholder container — populate later with a RecyclerView or comment rows -->
         <LinearLayout
             android:id="@+id/inputCommentSection"
             android:layout_width="wrap_content"
@@ -182,25 +181,26 @@
 
             <EditText
                 android:id="@+id/commentEditText"
-                android:layout_width="180dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="15dp"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
                 android:ems="10"
-                android:gravity="start|top"
+                android:gravity="left|bottom"
                 android:hint="Have something to say?"
                 android:textSize="12sp"
                 android:inputType="textMultiLine" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/submitCommentButton"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="3dp"
-                android:background="#FAFFFFFF"
+                android:layout_marginStart="15dp"
+                app:backgroundTint="@color/primary"
                 android:text="Comment"
-                android:textSize="10sp">
+                android:layout_gravity="center"
+                app:cornerRadius="50dp"
+                android:textSize="10sp"/>
 
-            </Button>
         </LinearLayout>
 
 
@@ -208,7 +208,7 @@
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="30dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="20dp"
             app:layout_constraintEnd_toEndOf="parent"
