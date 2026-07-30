@@ -12,5 +12,10 @@
         <item name="colorSurface">@color/surface</item>
 
         <item name="colorError">@color/error</item>
+
+        <item name="android:fontFamily">@font/noto_serif</item>
+        <item name="fontFamily">@font/noto_serif</item>
     </style>
+
+    <style name="Theme.B07group6" parent="Base.Theme.B07group6" />
 </resources>
