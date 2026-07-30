@@ -8,13 +8,13 @@ public class Comment {
     private String text;
     private String username;
     private String uid;
-    private long timestamp;
+    private Long timestamp;
 
     public Comment() {
         // required no-arg constructor for Firebase deserialization
     }
 
-    public Comment(String text, String username, String uid, long timestamp) {
+    public Comment(String text, String username, String uid, Long timestamp) {
         this.text = text;
         this.username = username;
         this.uid = uid;
@@ -33,6 +33,6 @@ public class Comment {
     public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
 
-    public long getTimestamp() { return timestamp; }
-    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+    public Long getTimestamp() { return timestamp; }
+    public void setTimestamp(Long timestamp) { this.timestamp = timestamp; }
 }

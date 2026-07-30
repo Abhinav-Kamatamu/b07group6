@@ -52,7 +52,7 @@ public class AddEditArtifactPresenter implements AddEditArtifactContract.Present
         // We only check for uniqueness when we're adding. Not editing
         databaseRepository.checkLotNumberExists(lotNumber, new DatabaseRepository.BooleanCallback() {
             @Override
-            public void onResult(boolean exists) {
+            public void onSuccess(boolean exists) {
                 if (exists) {
                     // We could not save because it already exists
                     view.showSaving(false, true);
@@ -94,19 +94,7 @@ public class AddEditArtifactPresenter implements AddEditArtifactContract.Present
     }
 
     private void saveArtifact(String lotNumber, Map<String, Object> draftArtifact, String newPublicUrl) {
-        Runnable innerSaveArtifact = () -> databaseRepository.saveArtifact(lotNumber, draftArtifact, new DatabaseRepository.SimpleCallback() {
-            @Override
-            public void onSuccess() {
-                view.navigateToHome();
-            }
-
-            @Override
-            public void onFailure(String errorMessage) {
-                // We could not save for other reasons
-                view.showSaving(false, isEditMode);
-                view.showError(errorMessage);
-            }
-        });
+       Runnable innerSaveArtifact = this.getRunnableForSave(lotNumber, draftArtifact);
         String oldUrl = null;
         if (newPublicUrl != null) {
             oldUrl = (String) draftArtifact.put("imageUrl", newPublicUrl);
@@ -127,6 +115,25 @@ public class AddEditArtifactPresenter implements AddEditArtifactContract.Present
             public void onError(String message) {
                 view.showError("Could not delete old image from Supabase: " + message);
                 view.showSaving(false, isEditMode);
+            }
+        });
+    }
+
+    private Runnable getRunnableForSave(String lotNumber, Map<String, Object> draftArtifact) {
+        DatabaseRepository.SaveArtifactMode mode = isEditMode
+                ? DatabaseRepository.SaveArtifactMode.UPDATE
+                : DatabaseRepository.SaveArtifactMode.CREATE;
+        return () -> databaseRepository.saveArtifact(mode, lotNumber, draftArtifact, new DatabaseRepository.SimpleCallback() {
+            @Override
+            public void onSuccess() {
+                view.navigateToHome();
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                // We could not save for other reasons
+                view.showSaving(false, isEditMode);
+                view.showError(errorMessage);
             }
         });
     }
