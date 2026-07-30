@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.b07group6.R;
 import com.example.b07group6.construct.Artifact;
 
@@ -106,6 +107,11 @@ public class ArtifactAdapter extends RecyclerView.Adapter<ArtifactAdapter.Artifa
         viewHolder.artifactDescription.setText(artifact.getDescription());
         Uri imageUrl = Uri.parse(artifact.getImageUrl());
         viewHolder.artifactImage.setImageURI(imageUrl);
+
+        Glide.with(viewHolder.itemView.getContext())
+                .load(artifact.getImageUrl())
+                .into(viewHolder.artifactImage);
+
         // Implement a way to get like count and then change the like count here:
         //        viewHolder.artifactLikeCount.setText(<<VALUE TO BE PASSED AS STRING>>);
         // Implement a way to get if toggled and then change the toggle here using an if statement here:
