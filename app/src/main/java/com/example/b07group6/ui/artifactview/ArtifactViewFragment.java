@@ -1,8 +1,11 @@
 package com.example.b07group6.ui.artifactview;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.transition.TransitionManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +36,7 @@ import com.example.b07group6.backend.FirebaseDatabaseRepository;
 import com.example.b07group6.backend.SupabaseImageRepository;
 import com.example.b07group6.construct.Artifact;
 import com.example.b07group6.construct.Comment;
+import com.example.b07group6.construct.User;
 import com.example.b07group6.shared.UserViewModel;
 import com.google.android.material.button.MaterialButton;
 
@@ -64,8 +68,7 @@ public class ArtifactViewFragment extends Fragment {
 
     private boolean isDescriptionExpanded = false;
     private UserViewModel userViewModel;
-    private Artifact artifact;
-    private FirebaseDatabaseRepository database;
+    private FirebaseDatabaseRepository databaseRepository;
 
     List<Comment> commentList = new ArrayList<>();
 
@@ -100,7 +103,7 @@ public class ArtifactViewFragment extends Fragment {
         // Get the UserViewModel
         NavBackStackEntry backStackEntry = Navigation.findNavController(view).getBackStackEntry(R.id.navigation_graph);
         userViewModel = new ViewModelProvider(backStackEntry).get(UserViewModel.class);
-        FirebaseDatabaseRepository databaseRepository = new FirebaseDatabaseRepository();
+        databaseRepository = new FirebaseDatabaseRepository();
         SupabaseImageRepository imageUploader = new SupabaseImageRepository(requireContext());
         String lotNumber = userViewModel.getExtendedLotNumber();
 
@@ -114,11 +117,8 @@ public class ArtifactViewFragment extends Fragment {
         databaseRepository.getArtifact(lotNumber, new DatabaseRepository.ArtifactCallback() {
             @Override
             public void onSuccess(Artifact fetchedArtifact) {
-                artifact = fetchedArtifact;
                 // set all text and image fields
                 setFields(fetchedArtifact, databaseRepository, lotNumber);
-                recyclerView.setAdapter(new CommentAdapter(getContext(), commentList));
-                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             }
             @Override
             public void onFailure(String errorMessage) {
@@ -131,11 +131,21 @@ public class ArtifactViewFragment extends Fragment {
         likeButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    Toast.makeText(getContext(), "Liked", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getContext(), "Unliked", Toast.LENGTH_SHORT).show();
-                }
+                databaseRepository.toggleLike(
+                        DatabaseRepository.LikeType.ARTIFACT,
+                        lotNumber,
+                        userViewModel.getCurrentUser().getUid(),
+                        new DatabaseRepository.SimpleCallback() {
+                            @Override
+                            public void onSuccess() {
+                                getArtifactLikeCount(lotNumber, userViewModel.getCurrentUser().getUid());
+                            }
+
+                            @Override
+                            public void onFailure(String errorMessage) {
+                                Toast.makeText(getContext(), "Failed to toggle like: " + errorMessage, Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }
         });
 
@@ -163,20 +173,24 @@ public class ArtifactViewFragment extends Fragment {
             public void onClick(View v) {
                 String input = commentsText.getText().toString();
                 if (!input.isBlank()) {
-                    databaseRepository.addComment(userViewModel.getExtendedLotNumber(), input,
+                    databaseRepository.addComment(
+                            lotNumber,
+                            input,
                             userViewModel.getCurrentUser().getUsername(),
                             userViewModel.getCurrentUser().getUid(),
                             new DatabaseRepository.SimpleCallback() {
                                 @Override
                                 public void onSuccess() {
                                     commentsText.setText("");
+                                    updateComments(lotNumber);
                                 }
-
                                 @Override
                                 public void onFailure(String errorMessage) {
                                     Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
                                 }
                             });
+                } else {
+                    Toast.makeText(getContext(), "Field cannot be empty", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -214,16 +228,96 @@ public class ArtifactViewFragment extends Fragment {
         artifactDynastyPeriod.setText(artifact.getDynastyPeriod());
         Glide.with(getContext()).load(artifact.getImageUrl()).error(R.drawable.ic_launcher_background).into(artifactImage);
         descriptionText.setText(artifact.getDescription());
+        getArtifactLikeCount(lotNumber, userViewModel.getCurrentUser().getUid());
         databaseRepository.getAllComments(lotNumber, new DatabaseRepository.CommentListCallback() {
             @Override
             public void onSuccess(List<Comment> comments) {
-                commentList = comments;
+                commentList = new ArrayList<>(comments); // need array list to delete comments (mutable)
+                CommentAdapter adapter = new CommentAdapter(getContext(),
+                        commentList,
+                        new CommentAdapter.onCommentLongClickListener() {
+                            @Override
+                            public void onLongClick(int position) {
+                                if (!userViewModel.getCurrentUser().isAdmin()) {
+                                    return;
+                                }
+                                showDeleteAlertDialog(position, lotNumber);
+                            }
+                        });
+                recyclerView.setAdapter(adapter);
+                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                if (recyclerView.getAdapter() != null) {
+                    commentsButton.setText(String.valueOf(recyclerView.getAdapter().getItemCount()));
+                } else {
+                    commentsButton.setText("0");
+                }
             }
-
             @Override
             public void onFailure(String errorMessage) {
                 Toast.makeText(getContext(), "Failed to fetch comments: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public void getArtifactLikeCount(String lotNumber, String uid) {
+        databaseRepository.getLikeStatus(DatabaseRepository.LikeType.ARTIFACT, lotNumber, uid,
+                new DatabaseRepository.LikeStatusCallback() {
+                    @Override
+                    public void onSuccess(long likeCount, boolean likedByCurrentUser) {
+                        likeButton.setText(String.valueOf(likeCount));
+                        likeButton.setChecked(likedByCurrentUser);
+                    }
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        Toast.makeText(getContext(), "Failed to fetch likes: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    public void updateComments(String lotNumber) {
+        databaseRepository.getAllComments(lotNumber, new DatabaseRepository.CommentListCallback() {
+            @Override
+            public void onSuccess(List<Comment> comments) {
+                commentList = new ArrayList<>(comments);
+                assert recyclerView.getAdapter() != null;
+                commentsButton.setText(String.valueOf(recyclerView.getAdapter().getItemCount()));
+                recyclerView.getAdapter().notifyDataSetChanged();
+            }
+            @Override
+            public void onFailure(String errorMessage) {
+                Toast.makeText(getContext(), "Failed to update comments: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void showDeleteAlertDialog(int position, String lotNumber) {
+        Comment comment = commentList.get(position);
+        User user = userViewModel.getCurrentUser();
+        new AlertDialog.Builder(getContext())
+                .setTitle("Delete " + comment.getUsername() + "'s comment?")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        databaseRepository.deleteComment(
+                                lotNumber,
+                                comment.getId(),
+                                new DatabaseRepository.SimpleCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        commentList.remove(position);
+                                        assert recyclerView.getAdapter() != null;
+                                        recyclerView.getAdapter().notifyItemRemoved(position);
+                                        Toast.makeText(getContext(), "Comment deleted", Toast.LENGTH_SHORT).show();
+                                    }
+                                    @Override
+                                    public void onFailure(String errorMessage) {
+                                        Toast.makeText(getContext(), "Failed to delete: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 }
