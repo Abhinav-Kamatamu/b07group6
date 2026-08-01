@@ -120,10 +120,7 @@ public class AddEditArtifactPresenter implements AddEditArtifactContract.Present
     }
 
     private Runnable getRunnableForSave(String lotNumber, Map<String, Object> draftArtifact) {
-        DatabaseRepository.SaveArtifactMode mode = isEditMode
-                ? DatabaseRepository.SaveArtifactMode.UPDATE
-                : DatabaseRepository.SaveArtifactMode.CREATE;
-        return () -> databaseRepository.saveArtifact(mode, lotNumber, draftArtifact, new DatabaseRepository.SimpleCallback() {
+        return () -> databaseRepository.saveArtifact(lotNumber, draftArtifact, new DatabaseRepository.SimpleCallback() {
             @Override
             public void onSuccess() {
                 view.navigateToHome();

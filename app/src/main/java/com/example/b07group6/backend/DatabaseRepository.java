@@ -47,6 +47,11 @@ public interface DatabaseRepository {
         void onFailure(String errorMessage);
     }
 
+    interface SavedCountCallback {
+        void onSuccess(long savedCount);
+        void onFailure(String errorMessage);
+    }
+
     interface StringListCallback {
         void onSuccess(List<String> lotNumbers);
         void onFailure(String errorMessage);
@@ -66,7 +71,7 @@ public interface DatabaseRepository {
     void getAllArtifacts(ArtifactListCallback callback);
     void getArtifact(String lotNumber, ArtifactCallback callback);
     void checkLotNumberExists(String lotNumber, BooleanCallback callback);
-    void saveArtifact(SaveArtifactMode mode, String lotNumber, Map<String, Object> artifactData, SimpleCallback callback);
+    void saveArtifact(String lotNumber, Map<String, Object> artifactData, SimpleCallback callback);
     void deleteArtifact(String lotNumber, SimpleCallback callback);
 
     // Likes
@@ -83,5 +88,6 @@ public interface DatabaseRepository {
     // Saved artifacts
     void getSavedArtifacts(String uid, StringListCallback callback);
     void getSavedArtifactsList(String uid, ArtifactListCallback callback);
+    void getNumSaved(String lotNumber, SavedCountCallback callback);
     void toggleSaved(String uid, String lotNumber, SimpleCallback callback);
 }
