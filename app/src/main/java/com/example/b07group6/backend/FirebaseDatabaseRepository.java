@@ -90,22 +90,18 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
     }
 
     @Override
-    public void saveArtifact(SaveArtifactMode mode, String lotNumber, Map<String, Object> artifactData, SimpleCallback callback) {
-        Map<String, Object> updates = new HashMap<>();
-        for (Map.Entry<String, Object> entry : artifactData.entrySet()) {
-            updates.put("artifacts/" + lotNumber + "/" + entry.getKey(), entry.getValue());
-        }
-        if (mode == SaveArtifactMode.CREATE) {
-            updates.put("likes/forArtifacts/" + lotNumber + "/count", 0);
-        }
-        rootRef.updateChildren(updates)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        callback.onSuccess();
-                    } else {
-                        mainHandler.post(() -> callback.onFailure("Failed to create artifact."));
-                    }
-                });
+    public void saveArtifact(String lotNumber, Map<String, Object> artifactData, SimpleCallback callback) {
+        artifactsRef.child(lotNumber).get().addOnSuccessListener(snapshot -> {
+            Map<String, Object> updates = new HashMap<>();
+            for (Map.Entry<String, Object> entry : artifactData.entrySet()) {
+                updates.put("artifacts/" + lotNumber + "/" + entry.getKey(), entry.getValue());
+            }
+            if (!snapshot.exists()) {
+                updates.put("likes/forArtifacts/" + lotNumber + "/count", 0);
+            }
+            rootRef.updateChildren(updates)
+                    .addOnCompleteListener(task -> completeSimple(task, callback));
+        });
     }
 
 
@@ -139,7 +135,7 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
                 rootRef.updateChildren(updates)
                         .addOnCompleteListener(task -> completeSimple(task, callback));
             }).addOnFailureListener(
-                    e -> callback.onFailure("Could not gather artifact data for deletion.")
+                    e -> mainHandler.post(() -> callback.onFailure("Could not gather artifact data for deletion."))
             );
     }
 
@@ -175,22 +171,25 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
     @Override
     public void toggleLike(LikeType type, String typeID, String uid, SimpleCallback callback) {
         String childName = type == LikeType.ARTIFACT ? "forArtifacts" : "forComments";
-        DatabaseReference userLikeRef = likesRef.child(childName).child(typeID).child("users").child(uid);
-        userLikeRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                boolean exists = snapshot.exists();
-                Map<String, Object> updates = new HashMap<>();
-                updates.put(childName + "/" + typeID + "/users/" + uid, exists ? null : true);
-                likesRef.updateChildren(updates)
-                        .addOnCompleteListener(task -> completeSimple(task, callback));
-            }
+        Task<DataSnapshot> uidTask = likesRef.child(childName).child(typeID).child("users").child(uid).get();
+        Task<DataSnapshot> countTask = likesRef.child(childName).child(typeID).child("count").get();
+        Tasks.whenAllSuccess(uidTask, countTask).addOnSuccessListener(results -> {
+            DataSnapshot uidSnapshot = (DataSnapshot) results.get(0);
+            DataSnapshot countSnapshot = (DataSnapshot) results.get(1);
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                mainHandler.post(() -> callback.onFailure(error.getMessage()));
+            Map<String, Object> updates = new HashMap<>();
+            Long count = countSnapshot.getValue(Long.class);
+            if (count == null) {
+                count = 0L;
             }
-        });
+            boolean alreadyLiked = uidSnapshot.exists();
+            updates.put(childName + "/" + typeID + "/count", alreadyLiked ? count - 1 : count + 1);
+            updates.put(childName + "/" + typeID + "/users/" + uid, alreadyLiked ? null : true);
+            likesRef.updateChildren(updates)
+                    .addOnCompleteListener(task -> completeSimple(task, callback));
+        }).addOnFailureListener(
+                e -> mainHandler.post(() -> callback.onFailure("Could not toggle like."))
+        );
     }
 
     @Override
@@ -258,8 +257,7 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
     public void addComment(String lotNumber, String text, String username, String uid, SimpleCallback callback) {
         String newCommentId = commentsRef.child("byCommentID").push().getKey();
         if (newCommentId == null) {
-            // only use mainHandler in asynchronous listeners
-            callback.onFailure("Could not generate comment ID.");
+            mainHandler.post(() -> callback.onFailure("Could not generate comment ID."));
             return;
         }
 
@@ -270,11 +268,11 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
         comment.put("timestamp", ServerValue.TIMESTAMP);
 
         Map<String, Object> updates = new HashMap<>();
-        updates.put("byCommentID/" + newCommentId, comment);
-        updates.put("byLotNumber/" + lotNumber + "/" + newCommentId, true);
+        updates.put("comments/byCommentID/" + newCommentId, comment);
+        updates.put("comments/byLotNumber/" + lotNumber + "/" + newCommentId, true);
         updates.put("likes/forComments/" + newCommentId + "/count", 0);
 
-        commentsRef.updateChildren(updates)
+        rootRef.updateChildren(updates)
                 .addOnCompleteListener(task -> completeSimple(task, callback));
     }
 
@@ -288,10 +286,6 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
                 .addOnCompleteListener(task -> completeSimple(task, callback));
     }
 
-    /**
-     * if type == Artifact, then typeID is the lotNumber
-     * if type == Comment, then typeID is the commentID
-     * */
     public void getNumComments(String lotNumber, CommentCountCallback callback) {
         commentsRef.child("byLotNumber").child(lotNumber)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -386,6 +380,23 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
                 mainHandler.post(() -> callback.onFailure(error.getMessage()));
             }
         });
+    }
+
+    @Override
+    public void getNumSaved(String lotNumber, SavedCountCallback callback) {
+        savedRef.child("byLotNumber").child(lotNumber)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        long count = snapshot.getChildrenCount();
+                        mainHandler.post(() -> callback.onSuccess(count));
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        mainHandler.post(() -> callback.onFailure(error.getMessage()));
+                    }
+                });
     }
 
     private void completeSimple(com.google.android.gms.tasks.Task<Void> task, SimpleCallback callback) {
