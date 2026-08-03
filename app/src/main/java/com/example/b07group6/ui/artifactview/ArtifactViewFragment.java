@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.transition.TransitionManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,10 +42,6 @@ import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.b07group6.R;
-
-import java.util.ArrayList;
-
 public class ArtifactViewFragment extends Fragment {
 
     private NestedScrollView nestedScrollView;
@@ -69,8 +64,10 @@ public class ArtifactViewFragment extends Fragment {
     private boolean isDescriptionExpanded = false;
     private UserViewModel userViewModel;
     private FirebaseDatabaseRepository databaseRepository;
+    private CompoundButton.OnCheckedChangeListener saveButtonListener;
+    private CompoundButton.OnCheckedChangeListener likeButtonListener;
 
-    List<Comment> commentList = new ArrayList<>();
+    List<Comment> commentList;
 
     @Nullable
     @Override
@@ -128,37 +125,42 @@ public class ArtifactViewFragment extends Fragment {
         });
 
         viewMoreButton.setOnClickListener(v -> toggleDescription());
-        likeButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
-                databaseRepository.toggleLike(
-                        DatabaseRepository.LikeType.ARTIFACT,
-                        lotNumber,
-                        userViewModel.getCurrentUser().getUid(),
-                        new DatabaseRepository.SimpleCallback() {
-                            @Override
-                            public void onSuccess() {
-                                getArtifactLikeCount(lotNumber, userViewModel.getCurrentUser().getUid());
-                            }
 
-                            @Override
-                            public void onFailure(String errorMessage) {
-                                Toast.makeText(getContext(), "Failed to toggle like: " + errorMessage, Toast.LENGTH_SHORT).show();
-                            }
-                        });
-            }
-        });
+        // must define so that we can turn on and off listener when updating isChecked
+        likeButtonListener = (buttonView, isChecked) -> databaseRepository.toggleLike(
+                DatabaseRepository.LikeType.ARTIFACT,
+                lotNumber,
+                userViewModel.getCurrentUser().getUid(),
+                new DatabaseRepository.SimpleCallback() {
+                    @Override
+                    public void onSuccess() {
+                        getArtifactLikeCount(lotNumber, userViewModel.getCurrentUser().getUid());
+                    }
 
-        saveButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    Toast.makeText(getContext(), "Saved", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getContext(), "Unsaved", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        Toast.makeText(getContext(), "Failed to toggle like: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
+        likeButton.setOnCheckedChangeListener(likeButtonListener);
+
+
+        saveButtonListener = (buttonView, isChecked) ->
+                databaseRepository.toggleSaved(
+                userViewModel.getCurrentUser().getUid(),
+                lotNumber,
+                new DatabaseRepository.SimpleCallback() {
+                    @Override
+                    public void onSuccess() {
+                        getArtifactSaveCount(lotNumber, userViewModel.getCurrentUser().getUid());
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        Toast.makeText(getContext(), "Failed to toggle like: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
+        saveButton.setOnCheckedChangeListener(saveButtonListener);
 
         commentsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -183,6 +185,7 @@ public class ArtifactViewFragment extends Fragment {
                                 public void onSuccess() {
                                     commentsText.setText("");
                                     updateComments(lotNumber);
+                                    Toast.makeText(getContext(), "Comment Posted!", Toast.LENGTH_SHORT).show();
                                 }
                                 @Override
                                 public void onFailure(String errorMessage) {
@@ -229,6 +232,7 @@ public class ArtifactViewFragment extends Fragment {
         Glide.with(getContext()).load(artifact.getImageUrl()).error(R.drawable.ic_launcher_background).into(artifactImage);
         descriptionText.setText(artifact.getDescription());
         getArtifactLikeCount(lotNumber, userViewModel.getCurrentUser().getUid());
+        getArtifactSaveCount(lotNumber, userViewModel.getCurrentUser().getUid());
         databaseRepository.getAllComments(lotNumber, new DatabaseRepository.CommentListCallback() {
             @Override
             public void onSuccess(List<Comment> comments) {
@@ -265,7 +269,10 @@ public class ArtifactViewFragment extends Fragment {
                     @Override
                     public void onSuccess(long likeCount, boolean likedByCurrentUser) {
                         likeButton.setText(String.valueOf(likeCount));
+                        // turn off listener to prevent infinite loop
+                        likeButton.setOnCheckedChangeListener(null);
                         likeButton.setChecked(likedByCurrentUser);
+                        likeButton.setOnCheckedChangeListener(likeButtonListener);
                     }
                     @Override
                     public void onFailure(String errorMessage) {
@@ -274,11 +281,31 @@ public class ArtifactViewFragment extends Fragment {
                 });
     }
 
+
+    public void getArtifactSaveCount(String lotNumber, String uid) {
+        databaseRepository.getSavedArtifacts(lotNumber,
+                new DatabaseRepository.StringListCallback() {
+            @Override
+            public void onSuccess(List<String> lotNumbers) {
+                saveButton.setText(lotNumbers.size());
+                saveButton.setOnCheckedChangeListener(null);
+                saveButton.setChecked(lotNumbers.contains(lotNumber));
+                saveButton.setOnCheckedChangeListener(saveButtonListener);
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Toast.makeText(getContext(), "Failed to get save count: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     public void updateComments(String lotNumber) {
         databaseRepository.getAllComments(lotNumber, new DatabaseRepository.CommentListCallback() {
             @Override
             public void onSuccess(List<Comment> comments) {
-                commentList = new ArrayList<>(comments);
+                commentList.clear();
+                commentList.addAll(comments);
                 assert recyclerView.getAdapter() != null;
                 commentsButton.setText(String.valueOf(recyclerView.getAdapter().getItemCount()));
                 recyclerView.getAdapter().notifyDataSetChanged();
