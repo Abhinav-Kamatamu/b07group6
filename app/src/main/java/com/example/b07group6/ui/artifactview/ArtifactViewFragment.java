@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.transition.TransitionManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -283,13 +284,13 @@ public class ArtifactViewFragment extends Fragment {
 
 
     public void getArtifactSaveCount(String lotNumber, String uid) {
-        databaseRepository.getSavedArtifacts(lotNumber,
-                new DatabaseRepository.StringListCallback() {
+        databaseRepository.getNumSaved(lotNumber, uid,
+                new DatabaseRepository.SavedCountCallback() {
             @Override
-            public void onSuccess(List<String> lotNumbers) {
-                saveButton.setText(lotNumbers.size());
+            public void onSuccess(long count, boolean savedByCurrentUser) {
+                saveButton.setText(String.valueOf(count));
                 saveButton.setOnCheckedChangeListener(null);
-                saveButton.setChecked(lotNumbers.contains(lotNumber));
+                saveButton.setChecked(savedByCurrentUser);
                 saveButton.setOnCheckedChangeListener(saveButtonListener);
             }
 

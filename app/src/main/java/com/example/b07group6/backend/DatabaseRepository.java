@@ -48,7 +48,7 @@ public interface DatabaseRepository {
     }
 
     interface SavedCountCallback {
-        void onSuccess(long savedCount);
+        void onSuccess(long savedCount, boolean savedByCurrentUser);
         void onFailure(String errorMessage);
     }
 
@@ -88,6 +88,6 @@ public interface DatabaseRepository {
     // Saved artifacts
     void getSavedArtifacts(String uid, StringListCallback callback);
     void getSavedArtifactsList(String uid, ArtifactListCallback callback);
-    void getNumSaved(String lotNumber, SavedCountCallback callback);
+    void getNumSaved(String lotNumber, String uid, SavedCountCallback callback);
     void toggleSaved(String uid, String lotNumber, SimpleCallback callback);
 }
