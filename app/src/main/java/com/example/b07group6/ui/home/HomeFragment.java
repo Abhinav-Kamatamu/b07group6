@@ -55,7 +55,7 @@ public class HomeFragment extends Fragment {
     private BottomNavigationView bottomNav;
     private View searchBarContainer;
 
-    private List<Artifact> artifactList;
+    private List<Artifact> artifactList = new ArrayList<>();
     private final List<Artifact> displayedArtifacts = new ArrayList<>();
     private ArtifactAdapter adapter;
 
