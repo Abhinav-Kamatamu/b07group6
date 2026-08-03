@@ -67,10 +67,9 @@ public class ArtifactAdapter extends RecyclerView.Adapter<ArtifactAdapter.Artifa
             artifactIsSaved.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        // Run code to add to saved and stuff for this artifact
-                    } else {
-                        // Run code to REMOVE from saved and stuff for this artifact
+                    int position = getBindingAdapterPosition();
+                    if (listener != null && position != RecyclerView.NO_POSITION) {
+                        listener.onSaveArifactPress(position, isChecked);
                     }
                 }
             });
