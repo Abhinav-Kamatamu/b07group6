@@ -383,13 +383,14 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
     }
 
     @Override
-    public void getNumSaved(String lotNumber, SavedCountCallback callback) {
+    public void getNumSaved(String lotNumber, String uid, SavedCountCallback callback) {
         savedRef.child("byLotNumber").child(lotNumber)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         long count = snapshot.getChildrenCount();
-                        mainHandler.post(() -> callback.onSuccess(count));
+                        boolean liked = snapshot.hasChild(uid);
+                        mainHandler.post(() -> callback.onSuccess(count, liked));
                     }
 
                     @Override
