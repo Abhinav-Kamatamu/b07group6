@@ -383,9 +383,6 @@ public class ArtifactViewFragment extends Fragment {
                 relatedArtifactsHeader.setVisibility(View.VISIBLE);
                 relatedArtifactsRecyclerView.setVisibility(View.VISIBLE);
 
-                relatedArtifactsHeader.setVisibility(View.VISIBLE);
-                relatedArtifactsRecyclerView.setVisibility(View.VISIBLE);
-
                 OnArtifactInteractionListener relatedListener = new OnArtifactInteractionListener() {
                     @Override
                     public void onSingleClick(int position) {
