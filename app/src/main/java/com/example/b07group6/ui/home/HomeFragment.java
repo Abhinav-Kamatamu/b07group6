@@ -65,6 +65,7 @@ public class HomeFragment extends Fragment {
     private ImageView searchIcon;
     private OnBackPressedCallback backPressedCallback;
     private User user;
+    private FirebaseDatabaseRepository firebase = new FirebaseDatabaseRepository();
 
 
     public HomeFragment() {
@@ -93,20 +94,33 @@ public class HomeFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         user = userViewModel.getCurrentUser();
 
-
-        // Extract data from database to populate artifactList...
-        FirebaseDatabaseRepository firebase = new FirebaseDatabaseRepository();
-
         firebase.getAllArtifacts(new DatabaseRepository.ArtifactListCallback() {
             @Override
             public void onSuccess(List<Artifact> artifacts) {
                 artifactList = artifacts;
+                displayedArtifacts.clear();
+                displayedArtifacts.addAll(artifactList);
 
                 recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                OnArtifactInteractionListener artifactInteractionListener = createInteractionListener(userViewModel, artifactList);
-                adapter = new ArtifactAdapter(artifactList, artifactInteractionListener);
+                OnArtifactInteractionListener artifactInteractionListener = createInteractionListener(userViewModel, displayedArtifacts);
+                adapter = new ArtifactAdapter(displayedArtifacts, artifactInteractionListener);
 
                 recyclerView.setAdapter(adapter);
+
+                for (Artifact artifact : artifactList) {
+                    firebase.getLikeStatus(DatabaseRepository.LikeType.ARTIFACT, artifact.getLotNumber(), user.getUid(), new DatabaseRepository.LikeStatusCallback() {
+                        @Override
+                        public void onSuccess(long likeCount, boolean likedByCurrentUser) {
+                            artifact.setLikeCount(likeCount);
+                            artifact.setLikedByCurrentUser(likedByCurrentUser);
+                            adapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onFailure(String errorMessage) {
+                        }
+                    });
+                }
             }
 
             @Override
@@ -167,7 +181,7 @@ public class HomeFragment extends Fragment {
                 artifact.getNotes()
         };
         for (String field : fields) {
-            if (field != null && field.toLowerCase().contains(query)) {
+            if (field != null && field.toLowerCase().contains(lowerQuery)) {
                 return true;
             }
         }
@@ -175,6 +189,9 @@ public class HomeFragment extends Fragment {
     }
 
     private void refreshDisplayedList() {
+        if (adapter == null) {
+            return;
+        }
         String query = searchEditText.getText().toString().trim();
         displayedArtifacts.clear();
         for (Artifact artifact : artifactList) {
@@ -296,6 +313,27 @@ public class HomeFragment extends Fragment {
                 // Write code that handles the bookmarking feature for this artifact
                 Artifact artifact = artifactList.get(position);
 
+            }
+
+            @Override
+            public void onLikePress(int position, boolean isLiked) {
+                Artifact artifact = artifactList.get(position);
+                artifact.setLikedByCurrentUser(isLiked);
+                artifact.setLikeCount(artifact.getLikeCount() + (isLiked ? 1 : -1));
+                adapter.notifyItemChanged(position);
+                firebase.toggleLike(DatabaseRepository.LikeType.ARTIFACT, artifact.getLotNumber(), user.getUid(), new DatabaseRepository.SimpleCallback() {
+                    @Override
+                    public void onSuccess() {
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        artifact.setLikedByCurrentUser(!isLiked);
+                        artifact.setLikeCount(artifact.getLikeCount() + (isLiked ? -1 : 1));
+                        adapter.notifyItemChanged(position);
+                        Toast.makeText(getContext(), "Action Failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
             @Override

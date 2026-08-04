@@ -16,6 +16,8 @@ public class Artifact {
     private String accessionNumber;
     private String notes;
     private String imageUrl;
+    private long likeCount;
+    private boolean likedByCurrentUser;
 
     public Artifact() {
         // required no-arg constructor for Firebase deserialization
@@ -65,4 +67,20 @@ public class Artifact {
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public long getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(long likeCount) {
+        this.likeCount = likeCount;
+    }
+
+    public boolean isLikedByCurrentUser() {
+        return likedByCurrentUser;
+    }
+
+    public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+        this.likedByCurrentUser = likedByCurrentUser;
+    }
 }
