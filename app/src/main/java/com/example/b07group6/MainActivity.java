@@ -15,9 +15,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
+/** The Main Activity that hosts the entire app */
 public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNav;
@@ -60,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
             if (itemId == R.id.nav_saved) {
                 // switch to saved artifacts fragment
                 navHostFragment.getNavController().navigate(R.id.action_global_to_saved);
-//                Log.println(1, "Using home page now...");
                 return true;
             } else if (itemId == R.id.nav_home) {
                 // switch to add and edit fragment
@@ -74,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
                 navHostFragment.getNavController().navigate(R.id.action_global_to_profile);
                 return true;
             }
-
             return false;
         });
     }

@@ -85,8 +85,7 @@
             android:layout_marginTop="16dp"
             android:gravity="top|start"
             android:hint="Description"
-            android:inputType="textMultiLine|textCapSentences"
-            android:minLines="3" />
+            android:inputType="textMultiLine|textCapSentences" />
 
         <!-- Category [mandatory] -->
         <TextView
@@ -152,8 +151,7 @@
             android:layout_marginTop="16dp"
             android:gravity="top|start"
             android:hint="Condition Report"
-            android:inputType="textMultiLine|textCapSentences"
-            android:minLines="2" />
+            android:inputType="textMultiLine|textCapSentences" />
 
         <!-- Current Location [optional] -->
         <EditText
@@ -183,8 +181,7 @@
             android:layout_marginTop="16dp"
             android:gravity="top|start"
             android:hint="Provenance"
-            android:inputType="textMultiLine|textCapSentences"
-            android:minLines="2" />
+            android:inputType="textMultiLine|textCapSentences" />
 
         <!-- Accession Number [optional] -->
         <EditText
@@ -204,8 +201,7 @@
             android:layout_marginTop="16dp"
             android:gravity="top|start"
             android:hint="Notes"
-            android:inputType="textMultiLine|textCapSentences"
-            android:minLines="2" />
+            android:inputType="textMultiLine|textCapSentences" />
         <!-- Save Artifact -->
         <Button
             android:id="@+id/save_artifact_button"

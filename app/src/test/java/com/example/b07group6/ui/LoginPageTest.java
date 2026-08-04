@@ -1,134 +1,163 @@
 package com.example.b07group6.ui;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import com.example.b07group6.backend.AuthOperator;
-import com.example.b07group6.construct.User;
 import com.example.b07group6.ui.login.LoginContract;
 import com.example.b07group6.ui.login.LoginPresenter;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
+/**
+ * Tests LoginPresenter by
+ * - verifying its methods return what it expected and nothing else
+ * - asserting that values retrieved from the View are sent to the correct location
+ */
+@RunWith(MockitoJUnitRunner.class)
 public class LoginPageTest {
 
-    private DummyView view;
-    private DummyAuthOperator authOperator;
+    @Mock
+    private LoginContract.View view;
+
+    @Mock
+    private AuthOperator authOperator;
+
     private LoginPresenter presenter;
 
+    /**
+     * Sets up the login presenter
+     */
     @Before
     public void setUp() {
-        view = new DummyView();
-        authOperator = new DummyAuthOperator();
         presenter = new LoginPresenter(view, authOperator);
     }
 
+    /**
+     * Tests if an attempted login with an empty email
+     * is not successful
+     */
     @Test
     public void emptyEmail_showsError_doesNotCallAuth() {
         presenter.onLoginClicked("", "password123");
-        assertEquals("A field is either empty or blank", view.lastError);
-        assertFalse(authOperator.signInCalled);
+
+        verify(view).showError("A field is either empty or blank");
+        verify(authOperator, never()).signIn(anyString(), anyString(), any());
     }
 
+    /**
+     * Tests if an attempted login with a blank password
+     * is not successful
+     */
     @Test
     public void blankPassword_showsError_doesNotCallAuth() {
         presenter.onLoginClicked("name@gmail.com", "   ");
-        assertEquals("A field is either empty or blank", view.lastError);
-        assertFalse(authOperator.signInCalled);
+
+        verify(view).showError("A field is either empty or blank");
+        verify(authOperator, never()).signIn(anyString(), anyString(), any());
     }
 
+    /**
+     * Tests if an attempted login with correct credentials successfully logs
+     * in and navigates to the home page
+     */
     @Test
     public void validCredentials_navigatesHomeWithCorrectUser() {
-        authOperator.userRecordUsername = "AnActualUsername";
-        authOperator.userRecordIsAdmin = false;
+        // Mock successful sign in
+        doAnswer(invocation -> {
+            AuthOperator.AuthCallback callback = invocation.getArgument(2);
+            callback.onSuccess("dummy-uid");
+            return null;
+        }).when(authOperator).signIn(anyString(), anyString(), any());
+
+        // Mock successful user record fetch (Non-Admin)
+        doAnswer(invocation -> {
+            AuthOperator.UserRecordCallback callback = invocation.getArgument(1);
+            callback.onSuccess("AnActualUsername", false);
+            return null;
+        }).when(authOperator).getUserRecord(anyString(), any());
+
         presenter.onLoginClicked("name@gmail.com", "omg6767hehe");
-        assertTrue(view.navigatedHome);
-        assertEquals("dummy-uid", view.dummyUser.getUid());
-        assertEquals("AnActualUsername", view.dummyUser.getUsername());
-        assertEquals("name@gmail.com", view.dummyUser.getEmail());
-        assertFalse(view.dummyUser.isAdmin());
+
+        verify(view).navigateToHome("dummy-uid", "AnActualUsername", "name@gmail.com", false);
     }
 
+    /**
+     * Tests if an attempted login for an admin account successfully logs the user
+     * in as an admin
+     */
     @Test
     public void adminUser_navigatesHomeWithAdminFlag() {
-        authOperator.userRecordUsername = "AdminUser";
-        authOperator.userRecordIsAdmin = true;
+        // Mock successful sign in
+        doAnswer(invocation -> {
+            AuthOperator.AuthCallback callback = invocation.getArgument(2);
+            callback.onSuccess("dummy-uid");
+            return null;
+        }).when(authOperator).signIn(anyString(), anyString(), any());
+
+        // Mock successful user record fetch (Admin)
+        doAnswer(invocation -> {
+            AuthOperator.UserRecordCallback callback = invocation.getArgument(1);
+            callback.onSuccess("AdminUser", true);
+            return null;
+        }).when(authOperator).getUserRecord(anyString(), any());
+
         presenter.onLoginClicked("admin@outlook.com", "sixsept#huitneuf");
-        assertTrue(view.navigatedHome);
-        assertTrue(view.dummyUser.isAdmin());
+
+        verify(view).navigateToHome("dummy-uid", "AdminUser", "admin@outlook.com", true);
     }
 
+    /**
+     * Tests if an attempted login with an incorrect password
+     * is not successful
+     */
     @Test
     public void wrongPassword_showsAuthErrorFromSignIn() {
-        authOperator.signInError = "The password is invalid";
+        // Mock failed sign in
+        doAnswer(invocation -> {
+            AuthOperator.AuthCallback callback = invocation.getArgument(2);
+            callback.onFailure("The password is invalid");
+            return null;
+        }).when(authOperator).signIn(anyString(), anyString(), any());
+
         presenter.onLoginClicked("name@gmail.com", "wrongpassword");
-        assertEquals("The password is invalid", view.lastError);
-        assertFalse(view.navigatedHome);
+
+        verify(view).showError("The password is invalid");
+        verify(authOperator, never()).getUserRecord(anyString(), any());
+        verify(view, never()).navigateToHome(anyString(), anyString(), anyString(), anyBoolean());
     }
 
+    /**
+     * Tests if a successful login that fails to fetch the users record
+     * displays an error
+     */
     @Test
     public void signInSucceeds_butUserRecordFetchFails_showsError() {
-        authOperator.userRecordError = "Could not load user data";
+        // Mock successful sign in
+        doAnswer(invocation -> {
+            AuthOperator.AuthCallback callback = invocation.getArgument(2);
+            callback.onSuccess("dummy-uid");
+            return null;
+        }).when(authOperator).signIn(anyString(), anyString(), any());
+
+        // Mock failed user record fetch
+        doAnswer(invocation -> {
+            AuthOperator.UserRecordCallback callback = invocation.getArgument(1);
+            callback.onFailure("Could not load user data");
+            return null;
+        }).when(authOperator).getUserRecord(anyString(), any());
+
         presenter.onLoginClicked("name@gmail.com", "password123");
-        assertEquals("Could not load user data", view.lastError);
-        assertFalse(view.navigatedHome);
-    }
 
-    // Android Studio says "Inner class 'DummyAuthOperator' may be 'static' "
-
-    static class DummyView implements LoginContract.View {
-        String lastError;
-        boolean navigatedHome;
-        User dummyUser;
-
-        @Override
-        public void showError(String message) {
-            lastError = message;
-        }
-
-        @Override
-        public void navigateToHome(String uid, String username, String email, boolean isAdmin) {
-            navigatedHome = true;
-            dummyUser = new User(uid, username, email, isAdmin);
-        }
-    }
-
-    static class DummyAuthOperator implements AuthOperator {
-        boolean signInCalled;
-        String signInError;
-        String userRecordUsername;
-        boolean userRecordIsAdmin;
-        String userRecordError;
-
-        @Override
-        public void signIn(String email, String password, AuthCallback callback) {
-            signInCalled = true;
-            if (signInError != null) {
-                callback.onFailure(signInError);
-            } else {
-                callback.onSuccess("dummy-uid");
-            }
-        }
-
-        @Override
-        public void getUserRecord(String uid, UserRecordCallback callback) {
-            if (userRecordError != null) {
-                callback.onFailure(userRecordError);
-            } else {
-                callback.onSuccess(userRecordUsername, userRecordIsAdmin);
-            }
-        }
-
-        @Override
-        public void signUp(String email, String password, AuthCallback callback) {
-            throw new UnsupportedOperationException("Sign up is not needed for LoginPageTest");
-        }
-
-        @Override
-        public void saveUserRecord(String uid, String username, String email, boolean isAdmin, AuthCallback callback) {
-            throw new UnsupportedOperationException("Saving user records is not needed for LoginPageTest");
-        }
+        verify(view).showError("Could not load user data");
+        verify(view, never()).navigateToHome(anyString(), anyString(), anyString(), anyBoolean());
     }
 }

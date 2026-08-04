@@ -81,6 +81,7 @@
                 android:layout_marginBottom="10dp"
                 android:textColor="@color/white"
                 android:button="@drawable/toggle_saved"
+                app:buttonTint="@color/save_toggle_colours"
                 android:checked="false" />
 
             <CheckBox

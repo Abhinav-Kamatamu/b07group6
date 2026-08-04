@@ -33,20 +33,18 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
-import com.example.b07group6.MainActivity;
 import com.example.b07group6.R;
 import com.example.b07group6.backend.DatabaseRepository;
 import com.example.b07group6.backend.FirebaseDatabaseRepository;
+import com.example.b07group6.backend.ImageRepository;
+import com.example.b07group6.backend.SupabaseImageRepository;
 import com.example.b07group6.construct.Artifact;
 import com.example.b07group6.shared.UserViewModel;
 import com.example.b07group6.construct.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.search.SearchBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +63,8 @@ public class HomeFragment extends Fragment {
     private ImageView searchIcon;
     private OnBackPressedCallback backPressedCallback;
     private User user;
-    private FirebaseDatabaseRepository firebase = new FirebaseDatabaseRepository();
+    private FirebaseDatabaseRepository firebase;
+    private SupabaseImageRepository supabase;
 
 
     public HomeFragment() {
@@ -85,6 +84,9 @@ public class HomeFragment extends Fragment {
         NavBackStackEntry backStackEntry = Navigation.findNavController(view).getBackStackEntry(R.id.navigation_graph);
         UserViewModel userViewModel = new ViewModelProvider(backStackEntry).get(UserViewModel.class);
 
+        firebase = new FirebaseDatabaseRepository();
+        supabase = new SupabaseImageRepository(requireContext());
+
         // Get the bottomNav bar
         bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
         searchBarContainer = view.findViewById(R.id.searchBarContainer);
@@ -94,6 +96,8 @@ public class HomeFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         user = userViewModel.getCurrentUser();
 
+
+        // Extract data from database to populate artifactList...
         firebase.getAllArtifacts(new DatabaseRepository.ArtifactListCallback() {
             @Override
             public void onSuccess(List<Artifact> artifacts) {
@@ -189,9 +193,9 @@ public class HomeFragment extends Fragment {
     }
 
     private void refreshDisplayedList() {
-        if (adapter == null) {
+        if(artifactList == null || adapter == null)
             return;
-        }
+
         String query = searchEditText.getText().toString().trim();
         displayedArtifacts.clear();
         for (Artifact artifact : artifactList) {
@@ -309,9 +313,20 @@ public class HomeFragment extends Fragment {
             }
 
             @Override
-            public void onSaveArifactPress(int position) {
+            public void onSaveArifactPress(int position, boolean isSaved) {
                 // Write code that handles the bookmarking feature for this artifact
                 Artifact artifact = artifactList.get(position);
+                firebase.toggleSaved(user.getUid(), artifact.getLotNumber(), new DatabaseRepository.SimpleCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Toast.makeText(getContext(), isSaved? "Saved" : "UnSaved" , Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        Toast.makeText(getContext(), "Action failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
             }
 
@@ -338,27 +353,41 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onItemLongPress(int position) {
-                // Write code that creates a highlight and asks for delete.
-                // If you choose to delete, then handle the delete too...
-                // You also need to handle the code to de-select the delete if you press elsewhere.
-                // This feature should only work for admins too...
-
-                // Here is temp alert box that does the job for now... (not verifying admin)
                 if (!user.isAdmin()){
                     return;
                 }
                 Artifact artifact = artifactList.get(position);
-                new AlertDialog.Builder(getContext())
-                        .setTitle(artifact.getArtifactName())
-                        .setItems(new String[]{"Cancel", "Delete"}, (dialog, which) -> {
-                            switch (which) {
-                                case 0: /* cancel */
-                                    break;
-                                case 1:
-//                                    artifactList.remove(position);
-                                    // Write code here to handle the artifact deletion in database
-                                    break;
-                            }
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(getContext())
+                        .setTitle("Delete artifact?")
+                        .setMessage("\"" + artifact.getArtifactName() + "\" will be permanently removed.")
+                        .setNegativeButton("Cancel", null)
+                        .setPositiveButton("Delete", (dialog, which) -> {
+                            // first delete the artifact data
+                            firebase.deleteArtifact(artifact.getLotNumber(), new DatabaseRepository.SimpleCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    // then attempt to delete the image.
+                                    supabase.deleteImage(artifact.getImageUrl(), new ImageRepository.DeleteCallback() {
+                                        @Override
+                                        public void onSuccess() {
+                                            Toast.makeText(getContext(), "Deleted Succesfully", Toast.LENGTH_SHORT).show();
+                                            artifactList.remove(position);
+                                            adapter.notifyDataSetChanged();
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            Toast.makeText(getContext(), "Delete partially failed", Toast.LENGTH_SHORT).show();
+                                            artifactList.remove(position);
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    });
+                                }
+                                @Override
+                                public void onFailure(String errorMessage) {
+                                    Toast.makeText(getContext(), "Delete failed", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         })
                         .show();
             }
