@@ -38,6 +38,8 @@ import com.example.b07group6.construct.Artifact;
 import com.example.b07group6.construct.Comment;
 import com.example.b07group6.construct.User;
 import com.example.b07group6.shared.UserViewModel;
+import com.example.b07group6.ui.home.ArtifactAdapter;
+import com.example.b07group6.ui.home.OnArtifactInteractionListener;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
@@ -61,6 +63,9 @@ public class ArtifactViewFragment extends Fragment {
     private EditText commentsText;
     private MaterialButton commentSubmitButton;
     private RecyclerView recyclerView;
+    private RecyclerView relatedArtifactsRecyclerView;
+    private TextView relatedArtifactsHeader;
+    private View relatedDivider;
 
     private boolean isDescriptionExpanded = false;
     private UserViewModel userViewModel;
@@ -97,6 +102,9 @@ public class ArtifactViewFragment extends Fragment {
         commentsText = view.findViewById(R.id.commentEditText);
         commentSubmitButton = view.findViewById(R.id.submitCommentButton);
         recyclerView = view.findViewById(R.id.recyclerView);
+        relatedArtifactsRecyclerView = view.findViewById(R.id.relatedArtifactsRecyclerView);
+        relatedArtifactsHeader = view.findViewById(R.id.relatedArtifactsHeader);
+        relatedDivider = view.findViewById(R.id.relatedDivider);
 
         // Get the UserViewModel
         NavBackStackEntry backStackEntry = Navigation.findNavController(view).getBackStackEntry(R.id.navigation_graph);
@@ -148,19 +156,19 @@ public class ArtifactViewFragment extends Fragment {
 
         saveButtonListener = (buttonView, isChecked) ->
                 databaseRepository.toggleSaved(
-                userViewModel.getCurrentUser().getUid(),
-                lotNumber,
-                new DatabaseRepository.SimpleCallback() {
-                    @Override
-                    public void onSuccess() {
-                        getArtifactSaveCount(lotNumber, userViewModel.getCurrentUser().getUid());
-                    }
+                        userViewModel.getCurrentUser().getUid(),
+                        lotNumber,
+                        new DatabaseRepository.SimpleCallback() {
+                            @Override
+                            public void onSuccess() {
+                                getArtifactSaveCount(lotNumber, userViewModel.getCurrentUser().getUid());
+                            }
 
-                    @Override
-                    public void onFailure(String errorMessage) {
-                        Toast.makeText(getContext(), "Failed to toggle like: " + errorMessage, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                            @Override
+                            public void onFailure(String errorMessage) {
+                                Toast.makeText(getContext(), "Failed to toggle like: " + errorMessage, Toast.LENGTH_SHORT).show();
+                            }
+                        });
         saveButton.setOnCheckedChangeListener(saveButtonListener);
 
         commentsButton.setOnClickListener(new View.OnClickListener() {
@@ -234,6 +242,7 @@ public class ArtifactViewFragment extends Fragment {
         descriptionText.setText(artifact.getDescription());
         getArtifactLikeCount(lotNumber, userViewModel.getCurrentUser().getUid());
         getArtifactSaveCount(lotNumber, userViewModel.getCurrentUser().getUid());
+        loadRelatedArtifacts(artifact);
         databaseRepository.getAllComments(lotNumber, new DatabaseRepository.CommentListCallback() {
             @Override
             public void onSuccess(List<Comment> comments) {
@@ -286,19 +295,19 @@ public class ArtifactViewFragment extends Fragment {
     public void getArtifactSaveCount(String lotNumber, String uid) {
         databaseRepository.getNumSaved(lotNumber, uid,
                 new DatabaseRepository.SavedCountCallback() {
-            @Override
-            public void onSuccess(long count, boolean savedByCurrentUser) {
-                saveButton.setText(String.valueOf(count));
-                saveButton.setOnCheckedChangeListener(null);
-                saveButton.setChecked(savedByCurrentUser);
-                saveButton.setOnCheckedChangeListener(saveButtonListener);
-            }
+                    @Override
+                    public void onSuccess(long count, boolean savedByCurrentUser) {
+                        saveButton.setText(String.valueOf(count));
+                        saveButton.setOnCheckedChangeListener(null);
+                        saveButton.setChecked(savedByCurrentUser);
+                        saveButton.setOnCheckedChangeListener(saveButtonListener);
+                    }
 
-            @Override
-            public void onFailure(String errorMessage) {
-                Toast.makeText(getContext(), "Failed to get save count: " + errorMessage, Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        Toast.makeText(getContext(), "Failed to get save count: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     public void updateComments(String lotNumber) {
@@ -347,5 +356,79 @@ public class ArtifactViewFragment extends Fragment {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    public void loadRelatedArtifacts(Artifact currentArtifact) {
+        databaseRepository.getAllArtifacts(new DatabaseRepository.ArtifactListCallback() {
+            @Override
+            public void onSuccess(List<Artifact> allArtifacts) {
+                List<Artifact> relatedArtifacts = new ArrayList<>();
+
+                for (Artifact other : allArtifacts) {
+                    if (other.getLotNumber().equals(currentArtifact.getLotNumber())) {
+                        continue;
+                    }
+                    if (isRelated(currentArtifact, other)) {
+                        relatedArtifacts.add(other);
+                    }
+                }
+
+                if (relatedArtifacts.isEmpty()) {
+                    relatedDivider.setVisibility(View.GONE);
+                    relatedArtifactsHeader.setVisibility(View.GONE);
+                    relatedArtifactsRecyclerView.setVisibility(View.GONE);
+                    return;
+                }
+                relatedDivider.setVisibility(View.VISIBLE);
+                relatedArtifactsHeader.setVisibility(View.VISIBLE);
+                relatedArtifactsRecyclerView.setVisibility(View.VISIBLE);
+
+                OnArtifactInteractionListener relatedListener = new OnArtifactInteractionListener() {
+                    @Override
+                    public void onSingleClick(int position) {
+                        Artifact clicked = relatedArtifacts.get(position);
+                        userViewModel.setExtendedLotNumber(clicked.getLotNumber());
+                        Navigation.findNavController(requireView()).navigate(R.id.action_global_extended);
+                    }
+
+                    @Override
+                    public void onSaveArifactPress(int position, boolean isSaved) {
+                        // handled inside ArtifactAdapter/card itself, nothing extra needed here
+                    }
+
+                    @Override
+                    public void onItemLongPress(int position) {
+                        // no long-press behaviour needed for related artifacts
+                    }
+                };
+
+                ArtifactAdapter adapter = new ArtifactAdapter(relatedArtifacts, relatedListener);
+                relatedArtifactsRecyclerView.setLayoutManager(
+                        new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+                relatedArtifactsRecyclerView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Toast.makeText(getContext(), "Failed to load related artifacts: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private boolean isRelated(Artifact current, Artifact other) {
+        if (fieldsMatch(current.getCategory(), other.getCategory())) {
+            return true;
+        }
+        if (fieldsMatch(current.getMaterial(), other.getMaterial())) {
+            return true;
+        }
+        if (fieldsMatch(current.getDynastyPeriod(), other.getDynastyPeriod())) {
+            return true;
+        }
+        return fieldsMatch(current.getCulturalOrigin(), other.getCulturalOrigin());
+    }
+
+    private boolean fieldsMatch(String field1, String field2) {
+        return field1 != null && field1.equals(field2);
     }
 }
