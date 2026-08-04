@@ -28,7 +28,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:layout_marginTop="20dp"
-            android:text="DEFAULT NAME"
+            android:textSize="20sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/artifactImage" />
 
@@ -38,7 +39,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:layout_marginTop="8dp"
-            android:text="CATEGORY"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/artifactName" />
 
@@ -48,7 +48,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:layout_marginTop="1dp"
-            android:text="MATERIAL"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/artifactCategory" />
 
@@ -58,13 +57,38 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:layout_marginTop="1dp"
-            android:text="DYNASTY/PERIOD"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/artifactMaterial" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/editArtifactButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="150dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="-30dp"
+            android:text="EDIT"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/artifactCategory"
+            app:layout_constraintTop_toBottomOf="@+id/artifactName" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/deleteArtifactButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="150dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="-30dp"
+            android:text="DELETE"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/artifactCategory"
+            app:layout_constraintTop_toBottomOf="@+id/editArtifactButton"/>
+
         <LinearLayout
             android:id="@+id/counts"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginTop="10dp"
@@ -88,8 +112,7 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="3dp"
                 android:paddingEnd="5dp"
-                android:button="@drawable/toggle_saved"
-                android:text="1.8M" />
+                android:button="@drawable/toggle_saved"/>
 
             <Button
                 android:id="@+id/commentsButtonAndCount"
@@ -150,83 +173,86 @@
             android:id="@+id/artifactMetadata"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="18dp"
             android:text="Artifact Metadata"
-            app:layout_constraintTop_toBottomOf="@id/viewMoreButton"
+            android:textSize="16sp"
+            android:textStyle="bold|italic"
             app:layout_constraintStart_toStartOf="parent"
-            android:marginStart="30dp"/>
+            app:layout_constraintTop_toBottomOf="@id/viewMoreButton" />
+
         <TextView
             android:id="@+id/artifactCulturalOrigin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="8dp"
             android:text="Cultural Origin"
-            app:layout_constraintTop_toBottomOf="@id/viewMoreButton"
             app:layout_constraintStart_toStartOf="parent"
-            android:marginStart="30dp"/>
+            app:layout_constraintTop_toBottomOf="@id/artifactMetadata" />
         <TextView
             android:id="@+id/artifactDimensions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Cultural Origin"
-            app:layout_constraintTop_toBottomOf="@id/viewMoreButton"
+            android:layout_marginTop="0dp"
+            android:text="Dimensions"
+            app:layout_constraintTop_toBottomOf="@id/artifactCulturalOrigin"
             app:layout_constraintStart_toStartOf="parent"
-            android:marginStart="30dp"/>
+            android:layout_marginStart="30dp"/>
         <TextView
             android:id="@+id/artifactConditionReport"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Cultural Origin"
-            app:layout_constraintTop_toBottomOf="@id/viewMoreButton"
+            android:layout_marginTop="0dp"
+            android:text="Condition Report"
+            app:layout_constraintTop_toBottomOf="@id/artifactDimensions"
             app:layout_constraintStart_toStartOf="parent"
-            android:marginStart="30dp"/>
+            android:layout_marginStart="30dp"/>
         <TextView
             android:id="@+id/artifactCurrentLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Cultural Origin"
-            app:layout_constraintTop_toBottomOf="@id/viewMoreButton"
+            android:layout_marginTop="0dp"
+            android:text="Current Location"
+            app:layout_constraintTop_toBottomOf="@id/artifactConditionReport"
             app:layout_constraintStart_toStartOf="parent"
-            android:marginStart="30dp"/>
+            android:layout_marginStart="30dp"/>
         <TextView
             android:id="@+id/artifactAcquisitionMethod"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Cultural Origin"
-            app:layout_constraintTop_toBottomOf="@id/viewMoreButton"
+            android:layout_marginTop="0dp"
+            android:text="Acquisition Method"
+            app:layout_constraintTop_toBottomOf="@id/artifactCurrentLocation"
             app:layout_constraintStart_toStartOf="parent"
-            android:marginStart="30dp"/>
+            android:layout_marginStart="30dp"/>
         <TextView
             android:id="@+id/artifactProvenance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Cultural Origin"
-            app:layout_constraintTop_toBottomOf="@id/viewMoreButton"
+            android:layout_marginTop="0dp"
+            android:text="Provenance"
+            app:layout_constraintTop_toBottomOf="@id/artifactAcquisitionMethod"
             app:layout_constraintStart_toStartOf="parent"
-            android:marginStart="30dp"/>
+            android:layout_marginStart="30dp"/>
         <TextView
             android:id="@+id/artifactAccesionNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Cultural Origin"
-            app:layout_constraintTop_toBottomOf="@id/viewMoreButton"
+            android:layout_marginTop="0dp"
+            android:text="Accesion Number"
+            app:layout_constraintTop_toBottomOf="@id/artifactProvenance"
             app:layout_constraintStart_toStartOf="parent"
-            android:marginStart="30dp"/>
+            android:layout_marginStart="30dp"/>
         <TextView
             android:id="@+id/artifactNotes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Cultural Origin"
-            app:layout_constraintTop_toBottomOf="@id/viewMoreButton"
+            android:layout_marginTop="0dp"
+            android:text="Notes"
+            app:layout_constraintTop_toBottomOf="@id/artifactAccesionNumber"
             app:layout_constraintStart_toStartOf="parent"
-            android:marginStart="30dp"/>
+            android:layout_marginStart="30dp"/>
 
         <!-- ===================== COMMENTS SECTION ===================== -->
 
@@ -240,7 +266,7 @@
             android:background="@color/text_secondary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/viewMoreButton" />
+            app:layout_constraintTop_toBottomOf="@+id/artifactNotes" />
 
         <TextView
             android:id="@+id/commentsHeader"

@@ -1,5 +1,7 @@
 package com.example.b07group6.ui.artifactview;
 
+import static android.view.View.GONE;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -57,6 +59,15 @@ public class ArtifactViewFragment extends Fragment {
     private CheckBox likeButton;
     private CheckBox saveButton;
     private Button commentsButton;
+    private TextView artifactMetadata;
+    private TextView artifactCulturalOrigin;
+    private TextView artifactDimensions;
+    private TextView artifactConditionReport;
+    private TextView artifactCurrentLocation;
+    private TextView artifactAcquisitionMethod;
+    private TextView artifactProvenance;
+    private TextView artifactAccesionMethod;
+    private TextView artifactNotes;
     private TextView commentsHeader;
     private EditText commentsText;
     private MaterialButton commentSubmitButton;
@@ -94,6 +105,15 @@ public class ArtifactViewFragment extends Fragment {
         commentsHeader = view.findViewById(R.id.commentsHeader);
         descriptionText = view.findViewById(R.id.descriptionText);
         viewMoreButton = view.findViewById(R.id.viewMoreButton);
+        artifactMetadata = view.findViewById(R.id.artifactMetadata);
+        artifactCulturalOrigin = view.findViewById(R.id.artifactCulturalOrigin);
+        artifactDimensions = view.findViewById(R.id.artifactDimensions);
+        artifactConditionReport = view.findViewById(R.id.artifactConditionReport);
+        artifactCurrentLocation = view.findViewById(R.id.artifactCurrentLocation);
+        artifactAcquisitionMethod = view.findViewById(R.id.artifactAcquisitionMethod);
+        artifactProvenance = view.findViewById(R.id.artifactProvenance);
+        artifactAccesionMethod = view.findViewById(R.id.artifactAccesionNumber);
+        artifactNotes = view.findViewById(R.id.artifactNotes);
         commentsText = view.findViewById(R.id.commentEditText);
         commentSubmitButton = view.findViewById(R.id.submitCommentButton);
         recyclerView = view.findViewById(R.id.recyclerView);
@@ -232,6 +252,62 @@ public class ArtifactViewFragment extends Fragment {
         artifactDynastyPeriod.setText(artifact.getDynastyPeriod());
         Glide.with(getContext()).load(artifact.getImageUrl()).error(R.drawable.ic_launcher_background).into(artifactImage);
         descriptionText.setText(artifact.getDescription());
+
+        // if checks for all optional artifact fields (is there a better way?)
+        int counter = 0;    // if all optional fields are empty, hide entire section
+        if (artifact.getCulturalOrigin() == null || artifact.getCulturalOrigin().trim().equals("")) {
+            artifactCulturalOrigin.setVisibility(GONE);
+            counter += 1;
+        } else {
+            artifactCulturalOrigin.setText("Cultural Origins: " + artifact.getCulturalOrigin());
+        }
+        if (artifact.getDimensions() == null || artifact.getDimensions().trim().equals("")) {
+            artifactDimensions.setVisibility(GONE);
+            counter += 1;
+        } else {
+            artifactDimensions.setText("Dimensions: " + artifact.getDimensions());
+        }
+        if (artifact.getConditionReport() == null || artifact.getConditionReport().trim().equals("")) {
+            artifactConditionReport.setVisibility(GONE);
+            counter += 1;
+        } else {
+            artifactConditionReport.setText("Condition: " + artifact.getConditionReport());
+        }
+        if (artifact.getCurrentLocation() == null || artifact.getCurrentLocation().trim().equals("")) {
+            artifactCurrentLocation.setVisibility(GONE);
+            counter += 1;
+        } else {
+            artifactCurrentLocation.setText("Current Location: " + artifact.getCurrentLocation());
+        }
+        if (artifact.getAcquisitionMethod() == null || artifact.getAcquisitionMethod().trim().equals("")) {
+            artifactAcquisitionMethod.setVisibility(GONE);
+            counter += 1;
+        } else {
+            artifactAcquisitionMethod.setText("Acquisition Method: " + artifact.getAcquisitionMethod());
+        }
+        if (artifact.getProvenance() == null || artifact.getProvenance().trim().equals("")) {
+            artifactProvenance.setVisibility(GONE);
+            counter += 1;
+        } else {
+            artifactProvenance.setText("Provenance: " + artifact.getProvenance());
+        }
+        if (artifact.getAccessionNumber() == null || artifact.getAccessionNumber().trim().equals("")) {
+            artifactAccesionMethod.setVisibility(GONE);
+            counter += 1;
+        } else {
+            artifactAccesionMethod.setText("Accesion Method: " + artifact.getAccessionNumber());
+        }
+        if (artifact.getNotes() == null || artifact.getNotes().trim().equals("")) {
+            artifactNotes.setVisibility(GONE);
+            counter += 1;
+        } else {
+            artifactNotes.setText("Other Notes: " + artifact.getNotes());
+        }
+
+        if (counter == 8) {
+            artifactMetadata.setVisibility(GONE);
+        }
+
         getArtifactLikeCount(lotNumber, userViewModel.getCurrentUser().getUid());
         getArtifactSaveCount(lotNumber, userViewModel.getCurrentUser().getUid());
         databaseRepository.getAllComments(lotNumber, new DatabaseRepository.CommentListCallback() {
