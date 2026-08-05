@@ -19,7 +19,6 @@ public class Artifact {
     private String imageUrl;
     private long likeCount;
     private boolean likedByCurrentUser;
-
     private boolean savedByCurrentUser;
 
     /**

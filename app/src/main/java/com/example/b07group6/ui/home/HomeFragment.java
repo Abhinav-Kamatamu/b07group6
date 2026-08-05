@@ -183,7 +183,6 @@ public class HomeFragment extends Fragment {
         if (query.isEmpty()) {
             return true;
         }
-        String lowerQuery = query.toLowerCase();
         String[] fields = {
                 artifact.getLotNumber(),
                 artifact.getArtifactName(),
@@ -201,7 +200,7 @@ public class HomeFragment extends Fragment {
                 artifact.getNotes()
         };
         for (String field : fields) {
-            if (field != null && field.toLowerCase().contains(lowerQuery)) {
+            if (field != null && field.toLowerCase().contains(query.toLowerCase())) {
                 return true;
             }
         }
@@ -211,7 +210,6 @@ public class HomeFragment extends Fragment {
     private void refreshDisplayedList() {
         if(artifactList == null || adapter == null)
             return;
-
         String query = searchEditText.getText().toString().trim();
         displayedArtifacts.clear();
         for (Artifact artifact : artifactList) {
