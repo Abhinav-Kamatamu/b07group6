@@ -12,6 +12,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.Map;
 
+/** The Model for the Login and Create page */
 public class FirebaseAuthOperator implements AuthOperator {
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     @Override

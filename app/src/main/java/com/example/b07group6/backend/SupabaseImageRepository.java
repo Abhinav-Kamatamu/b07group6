@@ -31,10 +31,16 @@ public class SupabaseImageRepository implements ImageRepository {
     private final Context appContext;
     private final OkHttpClient client = new OkHttpClient();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    /**
+     * Constructs a new SupabaseImageRepository
+     * @param context the current executing context
+     */
     public SupabaseImageRepository(Context context) {
         appContext = context.getApplicationContext();
     }
 
+    @Override
     public void uploadImage(Uri imageUri, String lotNumber, UploadCallback callback) {
         // Make sure the Supabase project URL, anon key, and bucket name were provided
         if (
@@ -116,6 +122,7 @@ public class SupabaseImageRepository implements ImageRepository {
         });
     }
 
+    @Override
     public void deleteImage(String publicUrl, DeleteCallback callback) {
         if (
                 isBlank(BuildConfig.SUPABASE_URL) || isBlank(BuildConfig.SUPABASE_ANON_KEY)

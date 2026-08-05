@@ -1,6 +1,5 @@
 package com.example.b07group6.backend;
 
-import android.util.Log;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -106,7 +105,8 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
 
 
     /**
-     * Note: This deletes the artifact and its associated data, but NOT the image of the artifact.
+     * {@inheritDoc}
+     * Note, this deletes the artifact and its associated data, but NOT the image of the artifact.
      * Please use the SupabaseImageRepository to delete the image first (or at least have the image
      * url) before deleting the artifact
      * */
@@ -139,7 +139,7 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
             );
     }
 
-    /**
+    /** {@inheritDoc}
      * If you want to get the number of like for an Artifact,
      * set type = LikeType.ARTIFACT and typeID = lotNumber.
      * If you want to get the number of like for a Comment,
@@ -165,6 +165,7 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
     }
 
     /**
+     * {@inheritDoc}
      * if type == Artifact, then typeID is the lotNumber
      * if type == Comment, then typeID is the commentID
      * */
@@ -400,6 +401,11 @@ public class FirebaseDatabaseRepository implements DatabaseRepository {
                 });
     }
 
+    /**
+     * A Method to execute a callback based on the status of a task
+     * @param task the task to evaluate
+     * @param callback the callback that will run
+     */
     private void completeSimple(com.google.android.gms.tasks.Task<Void> task, SimpleCallback callback) {
         if (task.isSuccessful()) {
             mainHandler.post(() -> callback.onSuccess());

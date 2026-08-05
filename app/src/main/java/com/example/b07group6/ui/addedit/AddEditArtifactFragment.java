@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/** The view fragment for the Add and Edit Artifact Page */
 public class AddEditArtifactFragment extends Fragment implements AddEditArtifactContract.View {
 
     private AddEditArtifactContract.Presenter presenter;
@@ -91,11 +92,6 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
                 .getBackStackEntry(R.id.navigation_graph);
         userViewModel = new ViewModelProvider(backStackEntry).get(UserViewModel.class);
 
-//        if (!userViewModel.getCurrentUser().isAdmin()) {
-//            navigateToHome();
-//            return;
-//        }
-
         defineVariablesFrom(view);
 
         FirebaseDatabaseRepository databaseRepository = new FirebaseDatabaseRepository();
@@ -147,6 +143,10 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
         saveButton.setOnClickListener(v -> onSaveClicked());
     }
 
+    /**
+     * Method to set instance variables from a view
+     * @param view the current View
+     */
     private void defineVariablesFrom(View view) {
         lotNumberField = view.findViewById(R.id.lot_number_field);
         nameField = view.findViewById(R.id.name_field);
@@ -169,6 +169,10 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
         saveButton = view.findViewById(R.id.save_artifact_button);
     }
 
+    /**
+     * Method to populate the instance variables if we're attempting to edit an Artifact
+     * @param artifact the current artifact
+     */
     private void populateFieldsForEdit(Artifact artifact) {
         nameField.setText(artifact.getArtifactName());
         descriptionField.setText(artifact.getDescription());
@@ -195,6 +199,12 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
         }
     }
 
+    /**
+     * Method to set a spinner's selection index from a string
+     * @param spinner the spinner to set the index of
+     * @param arrayResId the resource id of the string array
+     * @param value the value to set the spinner to
+     */
     private void setSpinnerSelection(Spinner spinner, int arrayResId, String value) {
         String[] options = getResources().getStringArray(arrayResId);
         int position = Arrays.asList(options).indexOf(value);
@@ -203,6 +213,10 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
         }
     }
 
+    /**
+     * Method to create a artifact from our instance variables
+     * before passing artifact creation to the presenter
+     * */
     private void onSaveClicked() {
         Map<String, Object> draftArtifact = new HashMap<>();
         String lotNumber = lotNumberField.getText().toString();
