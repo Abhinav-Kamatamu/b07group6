@@ -113,5 +113,9 @@
         <action
             android:id="@+id/action_extended_artifact_to_home"
             app:destination="@id/homeFragment" />
+        <!-- Transition to AddEditFragment -->
+        <action
+            android:id="@+id/action_extended_artifact_to_add_edit"
+            app:destination="@id/addEditArtifactFragment" />
     </fragment>
 </navigation>

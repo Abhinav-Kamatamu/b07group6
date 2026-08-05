@@ -251,6 +251,6 @@ public class AddEditArtifactFragment extends Fragment implements AddEditArtifact
     @Override
     public void navigateToHome() {
         userViewModel.setArtifactEditingLotNumber(null);
-        Navigation.findNavController(requireView()).navigate(R.id.action_add_edit_artifact_to_home);
+        Navigation.findNavController(requireView()).popBackStack();
     }
 }
