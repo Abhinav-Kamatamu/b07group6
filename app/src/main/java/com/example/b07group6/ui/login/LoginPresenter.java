@@ -2,10 +2,16 @@ package com.example.b07group6.ui.login;
 
 import com.example.b07group6.backend.AuthOperator;
 
+/** The presenter for the Login page */
 public class LoginPresenter implements LoginContract.Presenter {
     private final LoginContract.View view;
     private final AuthOperator authModel;
 
+    /**
+     * Create a presenter that handles logic between the model and the view
+     * @param view an object implementing {@link LoginContract.View}
+     * @param authModel an object implementing {@link AuthOperator}
+     * */
     public LoginPresenter(LoginContract.View view, AuthOperator authModel) {
         this.view = view;
         this.authModel = authModel;

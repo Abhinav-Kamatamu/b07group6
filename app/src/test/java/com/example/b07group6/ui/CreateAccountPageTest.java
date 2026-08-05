@@ -1,129 +1,150 @@
 package com.example.b07group6.ui;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import com.example.b07group6.backend.AuthOperator;
-import com.example.b07group6.construct.User;
 import com.example.b07group6.ui.createaccount.CreateAccountContract;
 import com.example.b07group6.ui.createaccount.CreateAccountPresenter;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
+/**
+ * Tests CreateAccountPresenter by
+ * - verifying its methods return what it expected and nothing else
+ * - asserting that values retrieved from the View are sent to the correct location
+ */
+@RunWith(MockitoJUnitRunner.class)
 public class CreateAccountPageTest {
 
-    private DummyView view;
-    private DummyAuthOperator authOperator;
+    @Mock
+    private CreateAccountContract.View view;
+
+    @Mock
+    private AuthOperator authOperator;
+
     private CreateAccountPresenter presenter;
 
+    /**
+     * Sets up the create account presenter
+     */
     @Before
     public void setUp() {
-        view = new DummyView();
-        authOperator = new DummyAuthOperator();
         presenter = new CreateAccountPresenter(view, authOperator);
     }
 
+    /**
+     * Tests if an attempted sign-up with an empty username
+     * is not successful
+     */
     @Test
     public void emptyUsername_showsError_doesNotCallAuth() {
         presenter.onCreateAccountClicked("", "name@gmail.com", "password123");
-        assertEquals("A field is either empty or blank", view.lastError);
-        assertFalse(authOperator.signUpCalled);
+
+        verify(view).showError("A field is either empty or blank");
+        verify(authOperator, never()).signUp(anyString(), anyString(), any());
     }
 
+    /**
+     * Tests if an attempted sign-up with a blank email
+     * is not successful
+     */
     @Test
     public void blankEmail_showsError_doesNotCallAuth() {
         presenter.onCreateAccountClicked("Haaland", "  ", "password123");
-        assertEquals("A field is either empty or blank", view.lastError);
-        assertFalse(authOperator.signUpCalled);
+
+        verify(view).showError("A field is either empty or blank");
+        verify(authOperator, never()).signUp(anyString(), anyString(), any());
     }
 
+    /**
+     * Tests if an attempted sign-up with an empty email
+     * is not successful
+     */
     @Test
     public void emptyPassword_showsError_doesNotCallAuth() {
         presenter.onCreateAccountClicked("Mbappe", "name@gmail.com", "");
-        assertEquals("A field is either empty or blank", view.lastError);
-        assertFalse(authOperator.signUpCalled);
+
+        verify(view).showError("A field is either empty or blank");
+        verify(authOperator, never()).signUp(anyString(), anyString(), any());
     }
 
+    /**
+     * Tests if an attempted sign-up valid input fields successfullt\y
+     * navigates to the homepage with this newly created account
+     */
     @Test
     public void validInputs_navigatesHomeWithNewUser() {
+        // Mock successful sign up
+        doAnswer(invocation -> {
+            AuthOperator.AuthCallback callback = invocation.getArgument(2);
+            callback.onSuccess("dummy-uid");
+            return null;
+        }).when(authOperator).signUp(anyString(), anyString(), any());
+
+        // Mock successful user record saving
+        doAnswer(invocation -> {
+            AuthOperator.AuthCallback callback = invocation.getArgument(4);
+            callback.onSuccess("dummy-uid");
+            return null;
+        }).when(authOperator).saveUserRecord(anyString(), anyString(), anyString(), anyBoolean(), any());
+
         presenter.onCreateAccountClicked("Ronaldo", "name@gmail.com", "password123");
-        assertTrue(view.navigatedHome);
-        assertEquals("dummy-uid", view.dummyUser.getUid());
-        assertEquals("Ronaldo", view.dummyUser.getUsername());
-        assertEquals("name@gmail.com", view.dummyUser.getEmail());
-        assertFalse(view.dummyUser.isAdmin());
+
+        verify(view).navigateToHome("dummy-uid", "Ronaldo", "name@gmail.com", false);
     }
 
+    /**
+     * Tests if an attempted sign-up with an email that is already in use
+     * is not successful
+     */
     @Test
     public void signUpFails_showsAuthError_doesNotSaveRecord() {
-        authOperator.signUpError = "The email address is already in use";
+        // Mock failed sign up
+        doAnswer(invocation -> {
+            AuthOperator.AuthCallback callback = invocation.getArgument(2);
+            callback.onFailure("The email address is already in use");
+            return null;
+        }).when(authOperator).signUp(anyString(), anyString(), any());
+
         presenter.onCreateAccountClicked("AVeryUniqueUsername", "name@gmail.com", "password123");
-        assertEquals("The email address is already in use", view.lastError);
-        assertFalse(authOperator.saveUserRecordCalled);
-        assertFalse(view.navigatedHome);
+
+        verify(view).showError("The email address is already in use");
+        verify(authOperator, never()).saveUserRecord(anyString(), anyString(), anyString(), anyBoolean(), any());
+        verify(view, never()).navigateToHome(anyString(), anyString(), anyString(), anyBoolean());
     }
 
+    /**
+     * Tests if an attempted sign-up shows an error if sign-up was successful but
+     * record saving fails
+     */
     @Test
     public void signUpSucceeds_butSaveRecordFails_showsError() {
-        authOperator.saveUserRecordError = "Could not save user record";
+        // Mock successful sign up
+        doAnswer(invocation -> {
+            AuthOperator.AuthCallback callback = invocation.getArgument(2);
+            callback.onSuccess("dummy-uid");
+            return null;
+        }).when(authOperator).signUp(anyString(), anyString(), any());
+
+        // Mock failed user record saving
+        doAnswer(invocation -> {
+            AuthOperator.AuthCallback callback = invocation.getArgument(4);
+            callback.onFailure("Could not save user record");
+            return null;
+        }).when(authOperator).saveUserRecord(anyString(), anyString(), anyString(), anyBoolean(), any());
+
         presenter.onCreateAccountClicked("AVeryUniqueUsername", "name@gmail.com", "password123");
-        assertEquals("Could not save user record", view.lastError);
-        assertFalse(view.navigatedHome);
-    }
 
-    static class DummyView implements CreateAccountContract.View {
-        String lastError;
-        boolean navigatedHome;
-        User dummyUser;
-
-        @Override
-        public void showError(String message) {
-            lastError = message;
-        }
-
-        @Override
-        public void navigateToHome(String uid, String username, String email, boolean isAdmin) {
-            navigatedHome = true;
-            dummyUser = new User(uid, username, email, isAdmin);
-        }
-    }
-
-    static class DummyAuthOperator implements AuthOperator {
-        boolean signUpCalled;
-        boolean saveUserRecordCalled;
-        String signUpError;
-        String saveUserRecordError;
-
-        @Override
-        public void signIn(String email, String password, AuthCallback callback) {
-            throw new UnsupportedOperationException("Sign in is not needed for CreateAccountPageTest");
-        }
-
-        @Override
-        public void getUserRecord(String uid, UserRecordCallback callback) {
-            throw new UnsupportedOperationException("Get user record is not needed for CreateAccountPageTest");
-        }
-
-        @Override
-        public void signUp(String email, String password, AuthCallback callback) {
-            signUpCalled = true;
-            if (signUpError != null) {
-                callback.onFailure(signUpError);
-            } else {
-                callback.onSuccess("dummy-uid");
-            }
-        }
-
-        @Override
-        public void saveUserRecord(String uid, String username, String email, boolean isAdmin, AuthCallback callback) {
-            saveUserRecordCalled = true;
-            if (saveUserRecordError != null) {
-                callback.onFailure(saveUserRecordError);
-            } else {
-                callback.onSuccess(uid);
-            }
-        }
+        verify(view).showError("Could not save user record");
+        verify(view, never()).navigateToHome(anyString(), anyString(), anyString(), anyBoolean());
     }
 }
