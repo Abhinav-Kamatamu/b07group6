@@ -4,4 +4,5 @@ public interface OnArtifactInteractionListener{
     void onSingleClick(int position);
     void onSaveArifactPress(int position, boolean isSaved);
     void onItemLongPress(int position);
+    void onLikePress(int position, boolean isLiked);
 }

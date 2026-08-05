@@ -17,12 +17,17 @@ public class Artifact {
     private String accessionNumber;
     private String notes;
     private String imageUrl;
+    private long likeCount;
+    private boolean likedByCurrentUser;
+    private boolean savedByCurrentUser;
 
     /**
      * Constructs a new, empty {@code Artifact} instance.
      * Required as a no-argument constructor for Firebase deserialization.
      */
-    public Artifact() { }
+    public Artifact() {
+        // required no-arg constructor for Firebase deserialization
+    }
 
     /**
      * Returns the lot number of the artifact.
@@ -205,4 +210,27 @@ public class Artifact {
      * @param imageUrl the image URL to set
      */
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public long getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(long likeCount) {
+        this.likeCount = likeCount;
+    }
+
+    public boolean isLikedByCurrentUser() {
+        return likedByCurrentUser;
+    }
+
+    public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+        this.likedByCurrentUser = likedByCurrentUser;
+    }
+    public boolean isSavedByCurrentUser() {
+        return savedByCurrentUser;
+    }
+
+    public void setSavedByCurrentUser(boolean savedByCurrentUser){
+        this.savedByCurrentUser = savedByCurrentUser;
+    }
 }

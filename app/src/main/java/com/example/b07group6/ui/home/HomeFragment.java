@@ -102,17 +102,50 @@ public class HomeFragment extends Fragment {
             @Override
             public void onSuccess(List<Artifact> artifacts) {
                 artifactList = artifacts;
+                displayedArtifacts.clear();
+                displayedArtifacts.addAll(artifactList);
 
                 recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                OnArtifactInteractionListener artifactInteractionListener = createInteractionListener(userViewModel, artifactList);
-                adapter = new ArtifactAdapter(artifactList, artifactInteractionListener);
-
+                OnArtifactInteractionListener artifactInteractionListener = createInteractionListener(userViewModel, displayedArtifacts);
+                adapter = new ArtifactAdapter(displayedArtifacts, artifactInteractionListener);
                 recyclerView.setAdapter(adapter);
+
+                for (int i = 0; i < artifactList.size(); i++) {
+                    final int index = i; // Needs to be final or the callback complains
+                    Artifact artifact = artifactList.get(index);
+                    firebase.getLikeStatus(DatabaseRepository.LikeType.ARTIFACT, artifact.getLotNumber(), user.getUid(), new DatabaseRepository.LikeStatusCallback() {
+                        @Override
+                        public void onSuccess(long likeCount, boolean likedByCurrentUser) {
+                            artifact.setLikeCount(likeCount);
+                            artifact.setLikedByCurrentUser(likedByCurrentUser);
+                            if (index < displayedArtifacts.size() && displayedArtifacts.get(index) == artifact) {
+                                adapter.notifyItemChanged(index);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(String errorMessage) {}
+                    });
+                    firebase.getNumSaved(artifact.getLotNumber(), user.getUid(), new DatabaseRepository.SavedCountCallback() {
+                        @Override
+                        public void onSuccess(long savedCount, boolean savedByCurrentUser) {
+                            artifact.setSavedByCurrentUser(savedByCurrentUser);
+                            if (index < displayedArtifacts.size() && displayedArtifacts.get(index) == artifact) {
+                                adapter.notifyItemChanged(index);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(String errorMessage) {
+                            Toast.makeText(getContext(), "Failed to get save status", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
             }
 
             @Override
             public void onFailure(String errorMessage) {
-                Toast.makeText(getContext(), "Artifact fetch failed", Toast.LENGTH_SHORT);
+                Toast.makeText(getContext(), "Artifact fetch failed", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -282,6 +315,24 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    private void removeArtifactByLotNumber(String lotNumber) {
+        for (int i = 0; i < artifactList.size(); i++) {
+            if (artifactList.get(i).getLotNumber().equals(lotNumber)) {
+                artifactList.remove(i);
+                break;
+            }
+        }
+        // The number of artifacts in the list is not necessarily equal to the
+        // number of artifacts being displayed
+        for (int i = 0; i < displayedArtifacts.size(); i++) {
+            if (displayedArtifacts.get(i).getLotNumber().equals(lotNumber)) {
+                displayedArtifacts.remove(i);
+                adapter.notifyItemRemoved(i);
+                break;
+            }
+        }
+    }
+
     private OnArtifactInteractionListener createInteractionListener(UserViewModel userViewModel, List<Artifact> artifactList){
         return new OnArtifactInteractionListener() {
             @Override
@@ -312,34 +363,51 @@ public class HomeFragment extends Fragment {
             }
 
             @Override
+            public void onLikePress(int position, boolean isLiked) {
+                Artifact artifact = artifactList.get(position);
+                artifact.setLikedByCurrentUser(isLiked);
+                artifact.setLikeCount(artifact.getLikeCount() + (isLiked ? 1 : -1));
+                firebase.toggleLike(DatabaseRepository.LikeType.ARTIFACT, artifact.getLotNumber(), user.getUid(), new DatabaseRepository.SimpleCallback() {
+                    @Override
+                    public void onSuccess() {
+                        adapter.notifyItemChanged(position);
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        artifact.setLikedByCurrentUser(!isLiked);
+                        artifact.setLikeCount(artifact.getLikeCount() + (isLiked ? -1 : 1));
+                        adapter.notifyItemChanged(position);
+                        Toast.makeText(getContext(), "Action Failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
             public void onItemLongPress(int position) {
-                if (!user.isAdmin()){
+                if (!user.isAdmin()) {
                     return;
                 }
-                Artifact artifact = artifactList.get(position);
-                new com.google.android.material.dialog.MaterialAlertDialogBuilder(getContext())
+                Artifact artifact = artifactList.get(position); // this is displayedArtifacts, the param
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
                         .setTitle("Delete artifact?")
                         .setMessage("\"" + artifact.getArtifactName() + "\" will be permanently removed.")
                         .setNegativeButton("Cancel", null)
                         .setPositiveButton("Delete", (dialog, which) -> {
-                            // first delete the artifact data
                             firebase.deleteArtifact(artifact.getLotNumber(), new DatabaseRepository.SimpleCallback() {
                                 @Override
                                 public void onSuccess() {
-                                    // then attempt to delete the image.
                                     supabase.deleteImage(artifact.getImageUrl(), new ImageRepository.DeleteCallback() {
                                         @Override
                                         public void onSuccess() {
+                                            removeArtifactByLotNumber(artifact.getLotNumber());
                                             Toast.makeText(getContext(), "Deleted Succesfully", Toast.LENGTH_SHORT).show();
-                                            artifactList.remove(position);
-                                            adapter.notifyDataSetChanged();
                                         }
 
                                         @Override
                                         public void onError(String message) {
+                                            removeArtifactByLotNumber(artifact.getLotNumber());
                                             Toast.makeText(getContext(), "Delete partially failed", Toast.LENGTH_SHORT).show();
-                                            artifactList.remove(position);
-                                            adapter.notifyDataSetChanged();
                                         }
                                     });
                                 }

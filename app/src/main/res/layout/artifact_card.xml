@@ -59,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:text="Description just goes on and on and on until it needs to wrap"
                 android:textSize="13sp"
-                android:textColor="#666666"
+                android:textColor="@color/text_secondary"
                 android:maxLines="2"
                 android:ellipsize="end" />
         </LinearLayout>
@@ -84,18 +84,19 @@
                 app:buttonTint="@color/save_toggle_colours"
                 android:checked="false" />
 
-            <ImageView
-                android:id="@+id/artifact_likes_icon"
+            <CheckBox
+                android:id="@+id/artifact_like_button"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_favourite_filled"
+                android:button="@drawable/favorite_selector"
+                android:checked="false"
                 android:contentDescription="Likes" />
 
             <TextView
                 android:id="@+id/artifact_likes_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="2.2K"
+                android:text="0"
                 android:textSize="12sp"
                 android:layout_marginTop="2dp" />
         </LinearLayout>

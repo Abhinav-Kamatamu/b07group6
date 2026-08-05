@@ -1,9 +1,8 @@
 package com.example.b07group6.ui.artifactview;
 
-import static android.view.View.GONE;
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import static android.view.View.GONE;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.transition.TransitionManager;
@@ -544,6 +543,7 @@ public class ArtifactViewFragment extends Fragment {
                 relatedArtifactsHeader.setVisibility(View.VISIBLE);
                 relatedArtifactsRecyclerView.setVisibility(View.VISIBLE);
 
+                // TODO: The following functions are to be implemented
                 OnArtifactInteractionListener relatedListener = new OnArtifactInteractionListener() {
                     @Override
                     public void onSingleClick(int position) {
@@ -554,12 +554,16 @@ public class ArtifactViewFragment extends Fragment {
 
                     @Override
                     public void onSaveArifactPress(int position, boolean isSaved) {
-                        // handled inside ArtifactAdapter/card itself, nothing extra needed here
+                        // On Save artifactPress needs to be handled
                     }
 
                     @Override
                     public void onItemLongPress(int position) {
-                        // no long-press behaviour needed for related artifacts
+                        // Long Press behaviour to be defined
+                    }
+                    @Override
+                    public void onLikePress(int position, boolean isLiked) {
+                        // On Like Press to be handled
                     }
                 };
 
