@@ -48,6 +48,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class HomeFragment extends Fragment {
     private BottomNavigationView bottomNav;
@@ -76,6 +77,78 @@ public class HomeFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
+    /**
+     * Creates two instances of a {@link CompletableFuture}, one for the retrieval of likes, and
+     * one for the retrieval of saved, and adds it to the list of futures to complete for a
+     * specific artifact, based on the index of the artifact.
+     * @param artifact the current artifact being processed
+     * @param index the index of the artifact being processed
+     * @param futures the list of all futures to complete
+     */
+    private void createFutureForArtifact(Artifact artifact, int index, CompletableFuture<Void>[] futures) {
+        CompletableFuture<Void> likedFuture = new CompletableFuture<>();
+        CompletableFuture<Void> savedFuture = new CompletableFuture<>();
+        firebase.getLikeStatus(DatabaseRepository.LikeType.ARTIFACT, artifact.getLotNumber(), user.getUid(), new DatabaseRepository.LikeStatusCallback() {
+            @Override
+            public void onSuccess(long likeCount, boolean likedByCurrentUser) {
+                artifact.setLikeCount(likeCount);
+                artifact.setLikedByCurrentUser(likedByCurrentUser);
+                likedFuture.complete(null);
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                likedFuture.completeExceptionally(new Exception(errorMessage));
+            }
+        });
+        firebase.getNumSaved(artifact.getLotNumber(), user.getUid(), new DatabaseRepository.SavedCountCallback() {
+            @Override
+            public void onSuccess(long savedCount, boolean savedByCurrentUser) {
+                artifact.setSavedByCurrentUser(savedByCurrentUser);
+                savedFuture.complete(null);
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                likedFuture.completeExceptionally(new Exception(errorMessage));
+            }
+        });
+        futures[2 * index] = likedFuture;
+        futures[2 * index + 1] = savedFuture;
+    }
+
+    /**
+     * Assembles the adapter from a list of artifacts
+     * @param artifacts the list of artifacts to assemble
+     * @param userViewModel the current user view model
+     */
+    private void assembleAdapter(List<Artifact> artifacts, UserViewModel userViewModel) {
+        artifactList = artifacts;
+        displayedArtifacts.clear();
+        displayedArtifacts.addAll(artifactList);
+        // For every artifact, we have to wait for 2 things; The number of likes and the
+        // number of saved. Therefore, we need a array of futures that's twice the size of the
+        // artifact array. We cannot use a List as CompletableFuture.allOf does not accept it as
+        // a parameter. Therefore, we must use an array and manually insert instead of using
+        // List.add(...).
+        @SuppressWarnings("unchecked")
+        CompletableFuture<Void>[] futures = new CompletableFuture[artifactList.size() * 2];
+        for (int i = 0; i < artifactList.size(); i++) {
+            Artifact artifact = artifactList.get(i);
+            createFutureForArtifact(artifact, i, futures);
+        }
+        CompletableFuture.allOf(futures).thenAccept(result -> {
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            OnArtifactInteractionListener artifactInteractionListener = createInteractionListener(userViewModel, displayedArtifacts);
+            adapter = new ArtifactAdapter(displayedArtifacts, artifactInteractionListener);
+            recyclerView.setAdapter(adapter);
+        }).exceptionally(ex -> {
+            Toast.makeText(getContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
+            return null;
+        });
+    }
+
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -101,46 +174,7 @@ public class HomeFragment extends Fragment {
         firebase.getAllArtifacts(new DatabaseRepository.ArtifactListCallback() {
             @Override
             public void onSuccess(List<Artifact> artifacts) {
-                artifactList = artifacts;
-                displayedArtifacts.clear();
-                displayedArtifacts.addAll(artifactList);
-
-                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                OnArtifactInteractionListener artifactInteractionListener = createInteractionListener(userViewModel, displayedArtifacts);
-                adapter = new ArtifactAdapter(displayedArtifacts, artifactInteractionListener);
-                recyclerView.setAdapter(adapter);
-
-                for (int i = 0; i < artifactList.size(); i++) {
-                    final int index = i; // Needs to be final or the callback complains
-                    Artifact artifact = artifactList.get(index);
-                    firebase.getLikeStatus(DatabaseRepository.LikeType.ARTIFACT, artifact.getLotNumber(), user.getUid(), new DatabaseRepository.LikeStatusCallback() {
-                        @Override
-                        public void onSuccess(long likeCount, boolean likedByCurrentUser) {
-                            artifact.setLikeCount(likeCount);
-                            artifact.setLikedByCurrentUser(likedByCurrentUser);
-                            if (index < displayedArtifacts.size() && displayedArtifacts.get(index) == artifact) {
-                                adapter.notifyItemChanged(index);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(String errorMessage) {}
-                    });
-                    firebase.getNumSaved(artifact.getLotNumber(), user.getUid(), new DatabaseRepository.SavedCountCallback() {
-                        @Override
-                        public void onSuccess(long savedCount, boolean savedByCurrentUser) {
-                            artifact.setSavedByCurrentUser(savedByCurrentUser);
-                            if (index < displayedArtifacts.size() && displayedArtifacts.get(index) == artifact) {
-                                adapter.notifyItemChanged(index);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(String errorMessage) {
-                            Toast.makeText(getContext(), "Failed to get save status", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
+                assembleAdapter(artifacts, userViewModel);
             }
 
             @Override
@@ -149,19 +183,8 @@ public class HomeFragment extends Fragment {
             }
         });
 
-
-
         generateMenu(user.isAdmin()); // Adjust based on if admin
-
-
         setListeners();
-
-
-
-
-        // Scroll Space Adder has been disaled becasue we changed to Reletive Layout in activity_main.xml
-//        scrollSpaceAdder(view);
-
 
         // Handling Back Presses:
         backPressedCallback = new OnBackPressedCallback(false) {
@@ -341,7 +364,6 @@ public class HomeFragment extends Fragment {
                 Artifact artifact  = artifactList.get(position);
                 userViewModel.setExtendedLotNumber(artifact.getLotNumber());
                 Navigation.findNavController(requireView()).navigate(R.id.action_global_extended);
-
             }
 
             @Override
