@@ -400,6 +400,11 @@ public class ArtifactViewFragment extends Fragment {
                     public void onItemLongPress(int position) {
                         // no long-press behaviour needed for related artifacts
                     }
+
+                    @Override
+                    public void onLikePress(int position, boolean liked){
+                        // Behaviour to be copied from Fragment
+                    }
                 };
 
                 ArtifactAdapter adapter = new ArtifactAdapter(relatedArtifacts, relatedListener);

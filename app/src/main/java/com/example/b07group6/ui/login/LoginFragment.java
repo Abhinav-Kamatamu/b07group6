@@ -45,6 +45,7 @@ public class LoginFragment extends Fragment implements LoginContract.View {
         loginButton = view.findViewById(R.id.login_button);
         TextView newAccountView = view.findViewById(R.id.create_account_view);
 
+        presenter.onLoginClicked("abhinav.kamatamu@gmail.com", "Abhinav");
         loginButton.setOnClickListener(v -> {
             presenter.onLoginClicked(emailField.getText().toString(), passwordField.getText().toString());
             if (!emailField.getText().toString().isEmpty() && !passwordField.getText().toString().isEmpty()) {

@@ -124,6 +124,18 @@ public class HomeFragment extends Fragment {
                         public void onFailure(String errorMessage) {
                         }
                     });
+                    firebase.getNumSaved(artifact.getLotNumber(), user.getUid(), new DatabaseRepository.SavedCountCallback() {
+                        @Override
+                        public void onSuccess(long savedCount, boolean savedByCurrentUser) {
+                            artifact.setSavedByCurrentUser(savedByCurrentUser);
+                            adapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onFailure(String errorMessage) {
+                            Toast.makeText(getContext(), "Failed to get save status", Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
             }
 

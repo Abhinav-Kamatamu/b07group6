@@ -20,11 +20,15 @@ public class Artifact {
     private long likeCount;
     private boolean likedByCurrentUser;
 
+    private boolean savedByCurrentUser;
+
     /**
      * Constructs a new, empty {@code Artifact} instance.
      * Required as a no-argument constructor for Firebase deserialization.
      */
-    public Artifact() { }
+    public Artifact() {
+        // required no-arg constructor for Firebase deserialization
+    }
 
     /**
      * Returns the lot number of the artifact.
@@ -222,5 +226,12 @@ public class Artifact {
 
     public void setLikedByCurrentUser(boolean likedByCurrentUser) {
         this.likedByCurrentUser = likedByCurrentUser;
+    }
+    public boolean isSavedByCurrentUser() {
+        return savedByCurrentUser;
+    }
+
+    public void setSavedByCurrentUser(boolean savedByCurrentUser){
+        this.savedByCurrentUser = savedByCurrentUser;
     }
 }

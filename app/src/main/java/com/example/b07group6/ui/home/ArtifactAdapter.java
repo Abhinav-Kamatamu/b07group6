@@ -1,6 +1,7 @@
 package com.example.b07group6.ui.home;
 
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,16 +69,7 @@ public class ArtifactAdapter extends RecyclerView.Adapter<ArtifactAdapter.Artifa
                 }
             });
 
-            // Handling adding to saved artifact page:
-            artifactIsSaved.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
-                    int position = getBindingAdapterPosition();
-                    if (listener != null && position != RecyclerView.NO_POSITION) {
-                        listener.onSaveArifactPress(position, isChecked);
-                    }
-                }
-            });
+
 
             // Note for future me, use artifactIsSaved.toggle(); when you are initiating these stuffs.
 
@@ -116,6 +108,7 @@ public class ArtifactAdapter extends RecyclerView.Adapter<ArtifactAdapter.Artifa
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ArtifactViewHolder viewHolder, final int position) {
+        int position_2 = position;
         Artifact artifact = artifactList.get(position);
         viewHolder.artifactName.setText(artifact.getArtifactName());
         viewHolder.artifactDescription.setText(artifact.getDescription());
@@ -126,20 +119,22 @@ public class ArtifactAdapter extends RecyclerView.Adapter<ArtifactAdapter.Artifa
                 .load(artifact.getImageUrl())
                 .into(viewHolder.artifactImage);
 
+        viewHolder.artifactIsSaved.setChecked(artifact.isSavedByCurrentUser());
         viewHolder.artifactLikeCount.setText(String.valueOf(artifact.getLikeCount()));
         viewHolder.artifactLikeButton.setOnCheckedChangeListener(null);
         viewHolder.artifactLikeButton.setChecked(artifact.isLikedByCurrentUser());
-        viewHolder.artifactLikeButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+        // Handling adding to saved artifact page:
+        viewHolder.artifactIsSaved.setOnCheckedChangeListener(null);
+        viewHolder.artifactIsSaved.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                int pos = viewHolder.getBindingAdapterPosition();
-                if (listener != null && pos != RecyclerView.NO_POSITION) {
-                    listener.onLikePress(pos, isChecked);
+            public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
+                Log.d("OUCHES:SDLKJF:LSD", "We are calling a swap on: " + position_2);
+                if (listener != null && position_2 != RecyclerView.NO_POSITION) {
+                    listener.onSaveArifactPress(position_2, isChecked);
                 }
             }
         });
-        // Implement a way to get if toggled and then change the toggle here using an if statement here:
-        //        viewHolder.artifactIsSaved.toggle();
     }
     // END_INCLUDE(recyclerViewOnBindViewHolder)
 
