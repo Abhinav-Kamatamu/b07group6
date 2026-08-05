@@ -45,7 +45,6 @@
             android:contentDescription="Delete Artifact"
             android:src="@drawable/ic_delete"
             app:tint="@color/error"
-
             app:layout_constraintTop_toTopOf="@id/artifactImage"
             app:layout_constraintEnd_toEndOf="@id/artifactImage" />
 
@@ -119,7 +118,9 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="3dp"
                 android:paddingEnd="5dp"
-                android:button="@drawable/toggle_saved"/>
+                app:buttonTint="@color/save_toggle_colours"
+                android:button="@drawable/toggle_saved"
+                android:drawablePadding="8dp"/>
 
             <Button
                 android:id="@+id/commentsButtonAndCount"
@@ -127,7 +128,12 @@
                 android:layout_height="wrap_content"
                 android:background="#00FFFFFF"
                 android:drawableLeft="@drawable/ic_comment"
-                android:gravity="center|start|left"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:paddingStart="3dp"
+                android:paddingEnd="5dp"
+                android:layout_weight="0"
+                android:drawablePadding="8dp"
                 android:textColor="@color/text_primary" />
 
         </LinearLayout>
