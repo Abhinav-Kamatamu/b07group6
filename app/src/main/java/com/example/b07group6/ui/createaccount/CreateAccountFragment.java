@@ -22,12 +22,9 @@ import com.example.b07group6.shared.UserViewModel;
 import com.example.b07group6.construct.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+/** The view fragment for the Create Account Page */
 public class CreateAccountFragment extends Fragment implements CreateAccountContract.View {
     private CreateAccountContract.Presenter presenter;
-
-    public static CreateAccountFragment newInstance() {
-        return new CreateAccountFragment();
-    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,

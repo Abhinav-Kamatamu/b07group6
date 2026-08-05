@@ -24,12 +24,10 @@ import com.example.b07group6.construct.User;
 import com.example.b07group6.shared.UserViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+/** The view fragment for the Login Page */
 public class LoginFragment extends Fragment implements LoginContract.View {
     private LoginContract.Presenter presenter;
     private Button loginButton;
-    public static LoginFragment newInstance() {
-        return new LoginFragment();
-    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,

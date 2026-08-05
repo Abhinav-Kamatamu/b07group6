@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.navigation.ui.ktx)
     implementation(libs.recyclerview)
     testImplementation(libs.junit)
+    testImplementation("org.mockito:mockito-core:5.23.0")
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
     implementation(platform("com.google.firebase:firebase-bom:34.16.0"))

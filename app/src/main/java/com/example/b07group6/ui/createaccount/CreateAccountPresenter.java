@@ -2,6 +2,7 @@ package com.example.b07group6.ui.createaccount;
 
 import com.example.b07group6.backend.AuthOperator;
 
+/** The presenter for the Create Account page */
 public class CreateAccountPresenter implements CreateAccountContract.Presenter {
     private final CreateAccountContract.View view;
     private final AuthOperator authOperator;
