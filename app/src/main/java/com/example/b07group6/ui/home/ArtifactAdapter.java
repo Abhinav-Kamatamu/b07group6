@@ -93,7 +93,6 @@ public class ArtifactAdapter extends RecyclerView.Adapter<ArtifactAdapter.Artifa
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ArtifactViewHolder viewHolder, final int position) {
-        int position_2 = position;
         Artifact artifact = artifactList.get(position);
         viewHolder.artifactName.setText(artifact.getArtifactName());
         viewHolder.artifactDescription.setText(artifact.getDescription());
@@ -122,8 +121,9 @@ public class ArtifactAdapter extends RecyclerView.Adapter<ArtifactAdapter.Artifa
         viewHolder.artifactIsSaved.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
-                if (listener != null && position_2 != RecyclerView.NO_POSITION) {
-                    listener.onSaveArifactPress(position_2, isChecked);
+                int position = viewHolder.getBindingAdapterPosition();
+                if (listener != null && position != RecyclerView.NO_POSITION) {
+                    listener.onSaveArifactPress(position, isChecked);
                 }
             }
         });

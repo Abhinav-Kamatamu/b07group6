@@ -28,7 +28,7 @@
         app:launchSingleTop="true"
         app:popUpTo="@id/navigation_graph"
         app:popUpToInclusive="false"
-        app:destination="@id/homeFragment" />
+        app:destination="@id/savedFragment" />
     <action
         android:id="@+id/action_global_extended"
         app:launchSingleTop="true"
@@ -77,6 +77,13 @@
             android:id="@+id/action_home_to_add_edit_artifact"
             app:destination="@id/addEditArtifactFragment" />
     </fragment>
+    <!-- SavedFragment -->
+    <fragment
+        android:id="@+id/savedFragment"
+        android:name="com.example.b07group6.ui.saved.SavedFragment"
+        android:label="Saved Artifacts"
+        tools:layout="@layout/fragment_saved"/>
+
     <!-- AddEditArtifactFragment -->
     <fragment
         android:id="@+id/addEditArtifactFragment"
