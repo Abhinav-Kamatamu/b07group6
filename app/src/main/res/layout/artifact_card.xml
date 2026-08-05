@@ -59,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:text="Description just goes on and on and on until it needs to wrap"
                 android:textSize="13sp"
-                android:textColor="#666666"
+                android:textColor="@color/text_secondary"
                 android:maxLines="2"
                 android:ellipsize="end" />
         </LinearLayout>

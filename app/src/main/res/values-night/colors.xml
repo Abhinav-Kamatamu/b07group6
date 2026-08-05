@@ -4,6 +4,8 @@
     <color name="black">#FFFFFFFF</color>
     <color name="white">#FF000000</color>
     <color name="gray">#FF303030</color>
+    <color name="save_yellow">#FFEB3B</color>
+
 
     <!-- Primary palette — lighter/desaturated for dark backgrounds -->
     <color name="primary">#D98A93</color>
