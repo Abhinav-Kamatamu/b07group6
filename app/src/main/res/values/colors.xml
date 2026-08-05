@@ -17,6 +17,8 @@
     <!-- Background/surface -->
     <color name="background">#FAF7F2</color>
     <color name="surface">#FFFFFF</color>
+    <!-- Surface with 90% opacity -->
+    <color name="surface0.9">#E6FFFFFF</color>
 
     <!-- Text -->
     <color name="text_primary">#1C1C1C</color>

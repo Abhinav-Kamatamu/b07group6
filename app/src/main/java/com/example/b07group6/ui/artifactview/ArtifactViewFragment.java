@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,6 +36,7 @@ import com.bumptech.glide.Glide;
 import com.example.b07group6.R;
 import com.example.b07group6.backend.DatabaseRepository;
 import com.example.b07group6.backend.FirebaseDatabaseRepository;
+import com.example.b07group6.backend.ImageRepository;
 import com.example.b07group6.backend.SupabaseImageRepository;
 import com.example.b07group6.construct.Artifact;
 import com.example.b07group6.construct.Comment;
@@ -52,6 +54,8 @@ public class ArtifactViewFragment extends Fragment {
     private NestedScrollView nestedScrollView;
     private ConstraintLayout rootLayout;
     private ImageView artifactImage;
+    private ImageButton editArtifactButton;
+    private ImageButton deleteArtifactButton;
     private TextView artifactName;
     private TextView artifactCategory;
     private TextView artifactMaterial;
@@ -81,6 +85,7 @@ public class ArtifactViewFragment extends Fragment {
     private boolean isDescriptionExpanded = false;
     private UserViewModel userViewModel;
     private FirebaseDatabaseRepository databaseRepository;
+    private SupabaseImageRepository imageRepository;
     private CompoundButton.OnCheckedChangeListener saveButtonListener;
     private CompoundButton.OnCheckedChangeListener likeButtonListener;
 
@@ -100,6 +105,8 @@ public class ArtifactViewFragment extends Fragment {
         nestedScrollView = view.findViewById(R.id.nestedScrollView);
         rootLayout = view.findViewById(R.id.rootConstraintLayout);
         artifactImage = view.findViewById(R.id.artifactImage);
+        editArtifactButton = view.findViewById(R.id.editArtifactButton);
+        deleteArtifactButton = view.findViewById(R.id.deleteArtifactButton);
         artifactName = view.findViewById(R.id.artifactName);
         artifactCategory = view.findViewById(R.id.artifactCategory);
         artifactMaterial = view.findViewById(R.id.artifactMaterial);
@@ -130,8 +137,11 @@ public class ArtifactViewFragment extends Fragment {
         NavBackStackEntry backStackEntry = Navigation.findNavController(view).getBackStackEntry(R.id.navigation_graph);
         userViewModel = new ViewModelProvider(backStackEntry).get(UserViewModel.class);
         databaseRepository = new FirebaseDatabaseRepository();
-        SupabaseImageRepository imageUploader = new SupabaseImageRepository(requireContext());
+        imageRepository = new SupabaseImageRepository(requireContext());
         String lotNumber = userViewModel.getExtendedLotNumber();
+        // if user presses back and returns to extended artifact page, erase the artifact information
+        // from add-edit
+        userViewModel.setArtifactEditingLotNumber(null);
 
         // check so that checking database won't crash application
         if (lotNumber == null) {
@@ -152,6 +162,39 @@ public class ArtifactViewFragment extends Fragment {
                 navigateToHome();
             }
         });
+
+        // edit and delete artifact buttons only show when user is admin
+        if (userViewModel.getCurrentUser().isAdmin()) {
+            editArtifactButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    userViewModel.setArtifactEditingLotNumber(lotNumber);
+                    Navigation.findNavController(requireView()).navigate(R.id.action_extended_artifact_to_add_edit);
+                }
+            });
+
+            deleteArtifactButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    databaseRepository.getArtifact(lotNumber,
+                            new DatabaseRepository.ArtifactCallback() {
+                                @Override
+                                public void onSuccess(Artifact artifact) {
+                                    showArtifactDeleteAlertDialog(lotNumber, artifact);
+                                }
+
+                                @Override
+                                public void onFailure(String errorMessage) {
+                                    Toast.makeText(getContext(), "Failed to fetch artifact: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                }
+                            });
+
+                }
+            });
+        } else {
+            editArtifactButton.setVisibility(GONE);
+            deleteArtifactButton.setVisibility(GONE);
+        }
 
         viewMoreButton.setOnClickListener(v -> toggleDescription());
 
@@ -331,7 +374,7 @@ public class ArtifactViewFragment extends Fragment {
                                 if (!userViewModel.getCurrentUser().isAdmin()) {
                                     return;
                                 }
-                                showDeleteAlertDialog(position, lotNumber);
+                                showCommentDeleteAlertDialog(position, lotNumber);
                             }
                         });
                 recyclerView.setAdapter(adapter);
@@ -347,6 +390,50 @@ public class ArtifactViewFragment extends Fragment {
                 Toast.makeText(getContext(), "Failed to fetch comments: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public void showArtifactDeleteAlertDialog(String lotNumber, Artifact artifact) {
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(getContext())
+                .setTitle("Delete artifact?")
+                .setMessage("\"" + artifact.getArtifactName() + "\" will be permanently removed.")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // prevent access to database while deleting artifact
+                        likeButton.setOnCheckedChangeListener(null);
+                        saveButton.setOnCheckedChangeListener(null);
+                        commentSubmitButton.setOnClickListener(null);
+                        String imageurl = artifact.getImageUrl();
+                        databaseRepository.deleteArtifact(
+                                lotNumber,
+                                new DatabaseRepository.SimpleCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        imageRepository.deleteImage(
+                                                imageurl,
+                                                new ImageRepository.DeleteCallback() {
+                                                    @Override
+                                                    public void onSuccess() {
+                                                        navigateToHome();
+                                                        Toast.makeText(getContext(), "Deleted Successfully", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                    @Override
+                                                    public void onError(String message) {
+                                                        Toast.makeText(getContext(), "Failed to delete image: " + message, Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }
+                                        );
+                                    }
+                                    @Override
+                                    public void onFailure(String errorMessage) {
+                                        Toast.makeText(getContext(), "Delete failed: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     public void getArtifactLikeCount(String lotNumber, String uid) {
@@ -392,7 +479,6 @@ public class ArtifactViewFragment extends Fragment {
             public void onSuccess(List<Comment> comments) {
                 commentList.clear();
                 commentList.addAll(comments);
-                assert recyclerView.getAdapter() != null;
                 commentsButton.setText(String.valueOf(recyclerView.getAdapter().getItemCount()));
                 recyclerView.getAdapter().notifyDataSetChanged();
             }
@@ -403,10 +489,10 @@ public class ArtifactViewFragment extends Fragment {
         });
     }
 
-    public void showDeleteAlertDialog(int position, String lotNumber) {
+    public void showCommentDeleteAlertDialog(int position, String lotNumber) {
         Comment comment = commentList.get(position);
         User user = userViewModel.getCurrentUser();
-        new AlertDialog.Builder(getContext())
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(getContext())
                 .setTitle("Delete " + comment.getUsername() + "'s comment?")
                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
@@ -418,7 +504,6 @@ public class ArtifactViewFragment extends Fragment {
                                     @Override
                                     public void onSuccess() {
                                         commentList.remove(position);
-                                        assert recyclerView.getAdapter() != null;
                                         recyclerView.getAdapter().notifyItemRemoved(position);
                                         Toast.makeText(getContext(), "Comment deleted", Toast.LENGTH_SHORT).show();
                                     }

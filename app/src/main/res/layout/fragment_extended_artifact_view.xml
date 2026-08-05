@@ -22,69 +22,76 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
+        <ImageButton
+            android:id="@+id/editArtifactButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/circle_background"
+            android:contentDescription="Edit Artifact"
+            android:src="@drawable/ic_edit"
+            app:tint="@color/primary"
+            app:layout_constraintTop_toTopOf="@id/artifactImage"
+            app:layout_constraintEnd_toStartOf="@id/deleteArtifactButton" />
+
+        <ImageButton
+            android:id="@+id/deleteArtifactButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="15dp"
+            android:background="@drawable/circle_background"
+            android:contentDescription="Delete Artifact"
+            android:src="@drawable/ic_delete"
+            app:tint="@color/error"
+
+            app:layout_constraintTop_toTopOf="@id/artifactImage"
+            app:layout_constraintEnd_toEndOf="@id/artifactImage" />
+
         <TextView
             android:id="@+id/artifactName"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
             android:layout_marginTop="20dp"
             android:textSize="20sp"
             android:textStyle="bold"
+            android:ellipsize="end"
+            android:maxLines="2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/artifactImage" />
 
         <TextView
             android:id="@+id/artifactCategory"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/artifactName" />
 
         <TextView
             android:id="@+id/artifactMaterial"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
             android:layout_marginTop="1dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/artifactCategory" />
 
         <TextView
             android:id="@+id/artifactDynastyPeriod"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
             android:layout_marginTop="1dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/artifactMaterial" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/editArtifactButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="150dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="-30dp"
-            android:text="EDIT"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/artifactCategory"
-            app:layout_constraintTop_toBottomOf="@+id/artifactName" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/deleteArtifactButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="150dp"
-            android:layout_marginTop="3dp"
-            android:layout_marginEnd="-30dp"
-            android:text="DELETE"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/artifactCategory"
-            app:layout_constraintTop_toBottomOf="@+id/editArtifactButton"/>
 
         <LinearLayout
             android:id="@+id/counts"
@@ -174,7 +181,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
-            android:layout_marginTop="18dp"
+            android:layout_marginTop="30dp"
             android:text="Artifact Metadata"
             android:textSize="16sp"
             android:textStyle="bold|italic"
@@ -183,76 +190,84 @@
 
         <TextView
             android:id="@+id/artifactCulturalOrigin"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
             android:layout_marginTop="8dp"
             android:text="Cultural Origin"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/artifactMetadata" />
         <TextView
             android:id="@+id/artifactDimensions"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="0dp"
             android:text="Dimensions"
             app:layout_constraintTop_toBottomOf="@id/artifactCulturalOrigin"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="30dp"/>
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"/>
         <TextView
             android:id="@+id/artifactConditionReport"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="0dp"
             android:text="Condition Report"
             app:layout_constraintTop_toBottomOf="@id/artifactDimensions"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="30dp"/>
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"/>
         <TextView
             android:id="@+id/artifactCurrentLocation"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="0dp"
             android:text="Current Location"
             app:layout_constraintTop_toBottomOf="@id/artifactConditionReport"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="30dp"/>
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"/>
         <TextView
             android:id="@+id/artifactAcquisitionMethod"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="0dp"
             android:text="Acquisition Method"
             app:layout_constraintTop_toBottomOf="@id/artifactCurrentLocation"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="30dp"/>
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"/>
         <TextView
             android:id="@+id/artifactProvenance"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="0dp"
             android:text="Provenance"
             app:layout_constraintTop_toBottomOf="@id/artifactAcquisitionMethod"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="30dp"/>
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"/>
         <TextView
             android:id="@+id/artifactAccesionNumber"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="0dp"
             android:text="Accesion Number"
             app:layout_constraintTop_toBottomOf="@id/artifactProvenance"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="30dp"/>
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"/>
         <TextView
             android:id="@+id/artifactNotes"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="0dp"
             android:text="Notes"
             app:layout_constraintTop_toBottomOf="@id/artifactAccesionNumber"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="30dp"/>
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"/>
 
         <!-- ===================== COMMENTS SECTION ===================== -->
 
@@ -262,7 +277,7 @@
             android:layout_height="1dp"
             android:layout_marginStart="30dp"
             android:layout_marginEnd="30dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="50dp"
             android:background="@color/text_secondary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -282,7 +297,7 @@
 
         <LinearLayout
             android:id="@+id/inputCommentSection"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintStart_toStartOf="parent"
@@ -293,22 +308,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="30dp"
+                android:layout_weight="1"
                 android:ems="10"
                 android:gravity="left|bottom"
                 android:hint="Have something to say?"
                 android:inputType="textMultiLine"
-                android:textSize="14sp"/>
+                android:textSize="14sp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/submitCommentButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="40dp"
-                app:backgroundTint="@color/primary"
-                android:text="Comment"
                 android:layout_gravity="center"
-                app:cornerRadius="50dp"
-                android:textSize="14sp"/>
+                android:layout_marginStart="40dp"
+                android:layout_marginEnd="30dp"
+                android:text="Comment"
+                android:textSize="14sp"
+                app:backgroundTint="@color/primary"
+                app:cornerRadius="50dp" />
 
         </LinearLayout>
 
@@ -333,7 +350,7 @@
             android:layout_height="1dp"
             android:layout_marginStart="30dp"
             android:layout_marginEnd="30dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="60dp"
             android:background="@color/text_secondary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

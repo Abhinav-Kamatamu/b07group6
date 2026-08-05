@@ -17,6 +17,8 @@
     <!-- Background/surface — dark instead of cream/white -->
     <color name="background">#121212</color>
     <color name="surface">#1E1E1E</color>
+    <!-- Surface with 90% opacity -->
+    <color name="surface0.9">#E61E1E1E</color>
 
     <!-- Text — inverted -->
     <color name="text_primary">#F5F5F5</color>
