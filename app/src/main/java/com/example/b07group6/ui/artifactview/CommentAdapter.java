@@ -12,18 +12,37 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.b07group6.R;
+import com.example.b07group6.construct.Artifact;
 import com.example.b07group6.construct.Comment;
+import com.example.b07group6.ui.cataloger.base.OnArtifactInteractionListener;
 
 import java.util.List;
 
+/**
+ * RecyclerView adapter responsible for binding a list of {@link Comment} objects
+ * to the comment card layout and for wiring up user interactions to an
+ * {@link onCommentLongClickListener}.
+ */
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.MyViewHolder>{
     Context context;
     List<Comment> commentList;
     onCommentLongClickListener longClickListener;
 
+    /** Interface for handling long clicks on a comment object */
     public interface onCommentLongClickListener {
+        /**
+         * Called when a comment object is long-pressed
+         * @param position the position of the pressed comment in the corresponding list
+         */
         void onLongClick(int position);
     }
+
+    /**
+     * Creates a new adapter for the list of comments
+     * @param context the context used to inflate
+     * @param commentList the list of comments used to populate recycler view
+     * @param longClickListener the listener method that will be binded to each comment object
+     */
     public CommentAdapter(Context context, List<Comment> commentList, onCommentLongClickListener longClickListener) {
         this.context = context;
         this.commentList = commentList;
@@ -73,8 +92,14 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.MyViewHo
         return commentList.size();
     }
 
+    /** ViewHolder that saves the references to views in the comment card */
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView username, postDate, commentBodyText;
+
+        /**
+         * Creates a ViewHolder for each comment card
+         * @param itemView the view representing the comment card
+         */
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             username = itemView.findViewById(R.id.Username);
