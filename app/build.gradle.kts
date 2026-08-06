@@ -1,5 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
+import java.io.File
 
 plugins {
     alias(libs.plugins.android.application)
@@ -81,4 +82,39 @@ dependencies {
     implementation("com.google.firebase:firebase-database")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.github.bumptech.glide:glide:5.0.5")
+}
+
+// Task to create Javadocs, as Android Studio Javadoc creation seems to be sort of broken
+// use './gradlew :app:generateJavadoc --no-configuration-cache' to run it. Using the run
+// button in Android Studio doesn't seem to work either
+tasks.register<Javadoc>("generateJavadoc") {
+    description = "Generates Javadoc for the project"
+    group = "documentation"
+    source = fileTree("src/main/java")
+    val compileTaskProvider = tasks.named<JavaCompile>("compileDebugJavaWithJavac")
+    dependsOn(compileTaskProvider)
+    val androidComponents = project.extensions.getByType<com.android.build.api.variant.ApplicationAndroidComponentsExtension>()
+    val bootClasspathProvider = androidComponents.sdkComponents.bootClasspath
+    doFirst {
+        val compileTask = compileTaskProvider.get()
+        val bootClasspath = bootClasspathProvider.get().map { it.asFile.absolutePath }.joinToString(File.pathSeparator)
+        classpath = files(
+            bootClasspath,
+            compileTask.classpath,
+            "${layout.buildDirectory.get()}/generated/source/buildConfig/debug",
+            "${layout.buildDirectory.get()}/intermediates/javac/debug/compileDebugJavaWithJavac/classes"
+        )
+    }
+    destinationDir = file("${layout.buildDirectory.get().asFile}/outputs/javadoc")
+    (options as StandardJavadocDocletOptions).apply {
+        encoding = "UTF-8"
+        charSet = "UTF-8"
+        docEncoding = "UTF-8"
+        addStringOption("Xdoclint:none", "-quiet")
+        links("https://developer.android.com/reference/")
+        links("https://docs.oracle.com/en/java/javase/11/docs/api/")
+        addBooleanOption("linksource", true)
+    }
+    exclude("**/BuildConfig.java")
+    exclude("**/R.java")
 }

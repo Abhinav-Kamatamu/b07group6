@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.b07group6.construct.User;
 
+/** The view model to keep state between fragment transitions */
 public class UserViewModel extends ViewModel {
     private User currentUser;
     private String artifactEditingLotNumber;
