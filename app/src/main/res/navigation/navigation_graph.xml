@@ -116,6 +116,11 @@
         android:name="com.example.b07group6.ui.artifactview.ArtifactViewFragment"
         android:label="Extended Artifact View"
         tools:layout="@layout/fragment_extended_artifact_view">
+        <argument
+            android:name="lotNumber"
+            app:argType="string"
+            android:defaultValue="@null"
+            app:nullable="true" />
         <!-- Transition to HomeFragment -->
         <action
             android:id="@+id/action_extended_artifact_to_home"
