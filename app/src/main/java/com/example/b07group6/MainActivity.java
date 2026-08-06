@@ -27,10 +27,8 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-
         bottomNav = findViewById(R.id.bottom_navigation);
         View root = findViewById(R.id.main);
-
 
         ViewCompat.setOnApplyWindowInsetsListener(root, (v, windowInsets) -> {
             Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -45,9 +43,7 @@ public class MainActivity extends AppCompatActivity {
         // This line hear makes the NavBar stick ot the very bottom. Commend these two out to enable a NavBarlift off
         ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> insets);
         ViewCompat.requestApplyInsets(bottomNav);
-
         handleBottomNavigation();
-
     }
 
     private void handleBottomNavigation(){

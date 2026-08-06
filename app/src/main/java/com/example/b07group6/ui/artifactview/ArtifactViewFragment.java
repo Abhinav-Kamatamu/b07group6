@@ -41,8 +41,8 @@ import com.example.b07group6.construct.Artifact;
 import com.example.b07group6.construct.Comment;
 import com.example.b07group6.construct.User;
 import com.example.b07group6.shared.UserViewModel;
-import com.example.b07group6.ui.home.ArtifactAdapter;
-import com.example.b07group6.ui.home.OnArtifactInteractionListener;
+import com.example.b07group6.ui.cataloger.base.ArtifactAdapter;
+import com.example.b07group6.ui.cataloger.base.OnArtifactInteractionListener;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:clipChildren="false"
     android:clipToPadding="false"
-    tools:context=".ui.saved.SavedFragment">
+    tools:context=".ui.cataloger.SavedFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"

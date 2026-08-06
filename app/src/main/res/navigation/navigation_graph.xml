@@ -69,7 +69,7 @@
     <!-- HomeFragment -->
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.b07group6.ui.home.HomeFragment"
+        android:name="com.example.b07group6.ui.cataloger.HomeFragment"
         android:label="Main Home"
         tools:layout="@layout/fragment_home">
         <!-- Transition to AddEditArtifactFragment -->
@@ -80,7 +80,7 @@
     <!-- SavedFragment -->
     <fragment
         android:id="@+id/savedFragment"
-        android:name="com.example.b07group6.ui.saved.SavedFragment"
+        android:name="com.example.b07group6.ui.cataloger.SavedFragment"
         android:label="Saved Artifacts"
         tools:layout="@layout/fragment_saved"/>
 

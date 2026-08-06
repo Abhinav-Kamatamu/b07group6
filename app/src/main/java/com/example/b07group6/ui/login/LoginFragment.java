@@ -54,7 +54,6 @@ public class LoginFragment extends Fragment implements LoginContract.View {
         newAccountView.setOnClickListener(
                 v -> Navigation.findNavController(view).navigate(R.id.action_create_account)
         );
-
         BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
         bottomNav.setVisibility(View.GONE);
     }
