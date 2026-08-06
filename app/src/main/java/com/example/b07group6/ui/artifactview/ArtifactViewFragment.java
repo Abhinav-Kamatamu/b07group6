@@ -47,6 +47,7 @@ import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class ArtifactViewFragment extends Fragment {
 
@@ -137,7 +138,12 @@ public class ArtifactViewFragment extends Fragment {
         userViewModel = new ViewModelProvider(backStackEntry).get(UserViewModel.class);
         databaseRepository = new FirebaseDatabaseRepository();
         imageRepository = new SupabaseImageRepository(requireContext());
-        String lotNumber = userViewModel.getExtendedLotNumber();
+        String lotNumber;
+        if (getArguments() != null && getArguments().getString("lotNumber") != null) {
+            lotNumber = getArguments().getString("lotNumber");
+        } else {
+            lotNumber = userViewModel.getExtendedLotNumber();
+        }
         // if user presses back and returns to extended artifact page, erase the artifact information
         // from add-edit
         userViewModel.setArtifactEditingLotNumber(null);
@@ -539,38 +545,31 @@ public class ArtifactViewFragment extends Fragment {
                     relatedArtifactsRecyclerView.setVisibility(View.GONE);
                     return;
                 }
+
                 relatedDivider.setVisibility(View.VISIBLE);
                 relatedArtifactsHeader.setVisibility(View.VISIBLE);
                 relatedArtifactsRecyclerView.setVisibility(View.VISIBLE);
 
-                // TODO: The following functions are to be implemented
-                OnArtifactInteractionListener relatedListener = new OnArtifactInteractionListener() {
-                    @Override
-                    public void onSingleClick(int position) {
-                        Artifact clicked = relatedArtifacts.get(position);
-                        userViewModel.setExtendedLotNumber(clicked.getLotNumber());
-                        Navigation.findNavController(requireView()).navigate(R.id.action_global_extended);
-                    }
+                // fetch like/save status for each related artifact before building the adapter,
+                // same pattern as CatalogFragment
+                @SuppressWarnings("unchecked")
+                java.util.concurrent.CompletableFuture<Void>[] futures =
+                        new java.util.concurrent.CompletableFuture[relatedArtifacts.size() * 2];
 
-                    @Override
-                    public void onSaveArifactPress(int position, boolean isSaved) {
-                        // On Save artifactPress needs to be handled
-                    }
+                for (int i = 0; i < relatedArtifacts.size(); i++) {
+                    createFutureForRelatedArtifact(relatedArtifacts.get(i), i, futures);
+                }
 
-                    @Override
-                    public void onItemLongPress(int position) {
-                        // Long Press behaviour to be defined
-                    }
-                    @Override
-                    public void onLikePress(int position, boolean isLiked) {
-                        // On Like Press to be handled
-                    }
-                };
-
-                ArtifactAdapter adapter = new ArtifactAdapter(relatedArtifacts, relatedListener);
-                relatedArtifactsRecyclerView.setLayoutManager(
-                        new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-                relatedArtifactsRecyclerView.setAdapter(adapter);
+                java.util.concurrent.CompletableFuture.allOf(futures).thenAccept(result -> {
+                    OnArtifactInteractionListener relatedListener = createRelatedInteractionListener(relatedArtifacts);
+                    ArtifactAdapter adapter = new ArtifactAdapter(relatedArtifacts, relatedListener);
+                    relatedArtifactsRecyclerView.setLayoutManager(
+                            new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+                    relatedArtifactsRecyclerView.setAdapter(adapter);
+                }).exceptionally(ex -> {
+                    Toast.makeText(getContext(), "Failed to load related artifact status: " + ex.getMessage(), Toast.LENGTH_SHORT).show();
+                    return null;
+                });
             }
 
             @Override
@@ -578,6 +577,112 @@ public class ArtifactViewFragment extends Fragment {
                 Toast.makeText(getContext(), "Failed to load related artifacts: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void createFutureForRelatedArtifact(Artifact artifact, int index,
+                                                java.util.concurrent.CompletableFuture<Void>[] futures) {
+        java.util.concurrent.CompletableFuture<Void> likedFuture = new java.util.concurrent.CompletableFuture<>();
+        java.util.concurrent.CompletableFuture<Void> savedFuture = new java.util.concurrent.CompletableFuture<>();
+
+        databaseRepository.getLikeStatus(
+                DatabaseRepository.LikeType.ARTIFACT,
+                artifact.getLotNumber(),
+                userViewModel.getCurrentUser().getUid(),
+                new DatabaseRepository.LikeStatusCallback() {
+                    @Override
+                    public void onSuccess(long likeCount, boolean likedByCurrentUser) {
+                        artifact.setLikeCount(likeCount);
+                        artifact.setLikedByCurrentUser(likedByCurrentUser);
+                        likedFuture.complete(null);
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        likedFuture.completeExceptionally(new Exception(errorMessage));
+                    }
+                }
+        );
+
+        databaseRepository.getNumSaved(artifact.getLotNumber(), userViewModel.getCurrentUser().getUid(),
+                new DatabaseRepository.SavedCountCallback() {
+                    @Override
+                    public void onSuccess(long savedCount, boolean savedByCurrentUser) {
+                        artifact.setSavedByCurrentUser(savedByCurrentUser);
+                        savedFuture.complete(null);
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        savedFuture.completeExceptionally(new Exception(errorMessage));
+                    }
+                }
+        );
+
+        futures[2 * index] = likedFuture;
+        futures[2 * index + 1] = savedFuture;
+    }
+
+    private OnArtifactInteractionListener createRelatedInteractionListener(List<Artifact> relatedArtifacts) {
+        return new OnArtifactInteractionListener() {
+            @Override
+            public void onSingleClick(int position) {
+                Artifact clicked = relatedArtifacts.get(position);
+                Bundle args = new Bundle();
+                args.putString("lotNumber", clicked.getLotNumber());
+                Navigation.findNavController(requireView()).navigate(R.id.extendedArtifactFragment, args);
+            }
+
+            @Override
+            public void onSaveArifactPress(int position, boolean isSaved) {
+                Artifact artifact = relatedArtifacts.get(position);
+                databaseRepository.toggleSaved(
+                        userViewModel.getCurrentUser().getUid(),
+                        artifact.getLotNumber(),
+                        new DatabaseRepository.SimpleCallback() {
+                            @Override
+                            public void onSuccess() {
+                                // nothing else needed, checkbox already reflects new state
+                            }
+
+                            @Override
+                            public void onFailure(String errorMessage) {
+                                Toast.makeText(getContext(), "Action failed", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                );
+            }
+
+            @Override
+            public void onLikePress(int position, boolean isLiked) {
+                Artifact artifact = relatedArtifacts.get(position);
+                artifact.setLikedByCurrentUser(isLiked);
+                artifact.setLikeCount(artifact.getLikeCount() + (isLiked ? 1 : -1));
+                databaseRepository.toggleLike(
+                        DatabaseRepository.LikeType.ARTIFACT,
+                        artifact.getLotNumber(),
+                        userViewModel.getCurrentUser().getUid(),
+                        new DatabaseRepository.SimpleCallback() {
+                            @Override
+                            public void onSuccess() {
+                                relatedArtifactsRecyclerView.getAdapter().notifyItemChanged(position);
+                            }
+
+                            @Override
+                            public void onFailure(String errorMessage) {
+                                artifact.setLikedByCurrentUser(!isLiked);
+                                artifact.setLikeCount(artifact.getLikeCount() + (isLiked ? -1 : 1));
+                                relatedArtifactsRecyclerView.getAdapter().notifyItemChanged(position);
+                                Toast.makeText(getContext(), "Action failed", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                );
+            }
+
+            @Override
+            public void onItemLongPress(int position) {
+                // no long-press behaviour needed for related artifacts
+            }
+        };
     }
 
     private boolean isRelated(Artifact current, Artifact other) {
