@@ -1,7 +1,6 @@
-package com.example.b07group6.ui.home;
+package com.example.b07group6.ui.cataloger.base;
 
 import android.net.Uri;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,18 +14,26 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.b07group6.R;
-import com.example.b07group6.construct.Artifact;
 import com.example.b07group6.backend.FirebaseDatabaseRepository;
+import com.example.b07group6.construct.Artifact;
 
 import java.util.List;
 
+/**
+ * RecyclerView adapter responsible for binding a list of {@link Artifact} objects
+ * to the artifact card layout and for wiring up user interactions to an
+ * {@link OnArtifactInteractionListener}.
+ */
 public class ArtifactAdapter extends RecyclerView.Adapter<ArtifactAdapter.ArtifactViewHolder> {
     private OnArtifactInteractionListener listener;
     private List<Artifact> artifactList;
     private FirebaseDatabaseRepository database;
     private String currentUid;
 
-    // ========= Defining the ViewHolder Class to hold our views ===========
+    /**
+     * ViewHolder that keeps references to the views within a single artifact card,
+     * and forwards clicks and long-presses to the adapter's listener.
+     */
     public static class ArtifactViewHolder extends RecyclerView.ViewHolder {
         TextView artifactName;
         TextView artifactDescription;
@@ -35,6 +42,11 @@ public class ArtifactAdapter extends RecyclerView.Adapter<ArtifactAdapter.Artifa
         CheckBox artifactLikeButton;
         TextView artifactLikeCount;
 
+        /**
+         * Creates a new ViewHolder for a single artifact card
+         * @param itemView the inflated artifact card view
+         * @param listener the listener to notify of single-click and long-press events
+         */
         public ArtifactViewHolder(View itemView, OnArtifactInteractionListener listener) {
             super(itemView);
 
@@ -68,29 +80,26 @@ public class ArtifactAdapter extends RecyclerView.Adapter<ArtifactAdapter.Artifa
                 }
             });
         }
-
-        // Write public fucntion to toggle saved and un saved. This function needs to handle all the saving operations...?
-        //      Not sure if we want to make this function do the saving of the operations yet...
     }
 
+    /**
+     * Creates a new adapter for a list of artifacts.
+     * @param artifactList the list of artifacts to display
+     * @param listener the listener for item interactions
+     */
     public ArtifactAdapter(List<Artifact> artifactList, OnArtifactInteractionListener listener) {
         this.artifactList = artifactList;
         this.listener = listener;
     }
 
-    // Create new views (invoked by the layout manager)
     @NonNull
     @Override
     public ArtifactViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Create a new view.
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.artifact_card, parent, false);
-
         return new ArtifactViewHolder(view, listener);
     }
 
-
-    // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ArtifactViewHolder viewHolder, final int position) {
         Artifact artifact = artifactList.get(position);
@@ -128,9 +137,7 @@ public class ArtifactAdapter extends RecyclerView.Adapter<ArtifactAdapter.Artifa
             }
         });
     }
-    // END_INCLUDE(recyclerViewOnBindViewHolder)
 
-    // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
         return artifactList.size();

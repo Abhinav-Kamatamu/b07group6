@@ -187,7 +187,9 @@ public interface DatabaseRepository {
      * Defines the constructs that can be liked within the application.
      */
     enum LikeType {
+        /** Likes pertaining to an artifact posting */
         ARTIFACT,
+        /** Likes pertaining to a comment posting*/
         COMMENT,
     }
 
