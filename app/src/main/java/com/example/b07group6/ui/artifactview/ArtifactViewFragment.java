@@ -310,9 +310,9 @@ public class ArtifactViewFragment extends Fragment {
 
     /**
      * Sets all the page's data fields when page is first loaded
-     * @param artifact artifact defined by
-     * @param databaseRepository
-     * @param lotNumber
+     * @param artifact artifact fetched from database using lotNumber
+     * @param databaseRepository instantiated object of the {@link FirebaseDatabaseRepository class} with no other arguments
+     * @param lotNumber represents the unique artifact. Fetched from either {@link UserViewModel} or navigation graph action's arguments
      */
     public void setFields(Artifact artifact, FirebaseDatabaseRepository databaseRepository, String lotNumber) {
         artifactName.setText(artifact.getArtifactName());
@@ -410,6 +410,11 @@ public class ArtifactViewFragment extends Fragment {
         });
     }
 
+    /**
+     * Creates the alert dialog when admin user presses the delete artifact button
+     * @param lotNumber represents the unique artifact. Fetched from either {@link UserViewModel} or navigation graph action's arguments
+     * @param artifact artifact fetched from database using lotNumber
+     */
     public void showArtifactDeleteAlertDialog(String lotNumber, Artifact artifact) {
         new com.google.android.material.dialog.MaterialAlertDialogBuilder(getContext())
                 .setTitle("Delete artifact?")
@@ -454,6 +459,11 @@ public class ArtifactViewFragment extends Fragment {
                 .show();
     }
 
+    /**
+     * Queries database and sets both the checked state of the like button and the like count
+     * @param lotNumber represents the unique artifact. Fetched from either {@link UserViewModel} or navigation graph action's arguments
+     * @param uid User's unique ID. Fetched from {@link UserViewModel}
+     */
     public void getArtifactLikeCount(String lotNumber, String uid) {
         databaseRepository.getLikeStatus(DatabaseRepository.LikeType.ARTIFACT, lotNumber, uid,
                 new DatabaseRepository.LikeStatusCallback() {
@@ -473,6 +483,11 @@ public class ArtifactViewFragment extends Fragment {
     }
 
 
+    /**
+     * Queries database and sets both the checked state of the save button and the save count
+     * @param lotNumber represents the unique artifact. Fetched from either {@link UserViewModel} or navigation graph action's arguments
+     * @param uid User's unique ID. Fetched from {@link UserViewModel}
+     */
     public void getArtifactSaveCount(String lotNumber, String uid) {
         databaseRepository.getNumSaved(lotNumber, uid,
                 new DatabaseRepository.SavedCountCallback() {
@@ -491,6 +506,10 @@ public class ArtifactViewFragment extends Fragment {
                 });
     }
 
+    /**
+     * Resets the comments RecyclerView based on any change to the comment list
+     * @param lotNumber represents the unique artifact. Fetched from either {@link UserViewModel} or navigation graph action's arguments
+     */
     public void updateComments(String lotNumber) {
         databaseRepository.getAllComments(lotNumber, new DatabaseRepository.CommentListCallback() {
             @Override
@@ -507,6 +526,11 @@ public class ArtifactViewFragment extends Fragment {
         });
     }
 
+    /**
+     * Creates the alert dialog when an admin user long presses any comment in the RecyclerView
+     * @param position position of the comment in the RecyclerView
+     * @param lotNumber represents the unique artifact. Fetched from either {@link UserViewModel} or navigation graph action's arguments
+     */
     public void showCommentDeleteAlertDialog(int position, String lotNumber) {
         Comment comment = commentList.get(position);
         User user = userViewModel.getCurrentUser();
@@ -537,6 +561,10 @@ public class ArtifactViewFragment extends Fragment {
                 .show();
     }
 
+    /**
+     * Populates a list with all artifacts related to the one on the current expanded artifact view page
+     * @param currentArtifact the artifact currently displayed on the page
+     */
     public void loadRelatedArtifacts(Artifact currentArtifact) {
         databaseRepository.getAllArtifacts(new DatabaseRepository.ArtifactListCallback() {
             @Override
@@ -592,6 +620,14 @@ public class ArtifactViewFragment extends Fragment {
         });
     }
 
+    /**
+     * Creates two instances of a {@link CompletableFuture}, one for the retrieval of likes, and
+     * one for the retrieval of saved, and adds it to the list of futures to complete for a
+     * specific artifact, based on the index of the artifact.
+     * @param artifact the current artifact being processed
+     * @param index the index of the artifact being processed
+     * @param futures the list of all futures to complete
+     */
     private void createFutureForRelatedArtifact(Artifact artifact, int index,
                                                 java.util.concurrent.CompletableFuture<Void>[] futures) {
         java.util.concurrent.CompletableFuture<Void> likedFuture = new java.util.concurrent.CompletableFuture<>();
@@ -635,6 +671,12 @@ public class ArtifactViewFragment extends Fragment {
         futures[2 * index + 1] = savedFuture;
     }
 
+    /**
+     * Builds the {@link OnArtifactInteractionListener} used by the adapter to handle
+     * interactions with artifact cards
+     * @param relatedArtifacts list containing all related artifacts that will be used to populate RecyclerView
+     * @return a listener that handles all artifact card interactions
+     */
     private OnArtifactInteractionListener createRelatedInteractionListener(List<Artifact> relatedArtifacts) {
         return new OnArtifactInteractionListener() {
             @Override
@@ -698,6 +740,12 @@ public class ArtifactViewFragment extends Fragment {
         };
     }
 
+    /**
+     * Simple similarity check between the current artifact and another artifact.
+     * @param current artifact currently displayed on page
+     * @param other a different artifact than the current one
+     * @return true if at least one of the mandatory data fields match
+     */
     private boolean isRelated(Artifact current, Artifact other) {
         if (fieldsMatch(current.getCategory(), other.getCategory())) {
             return true;
@@ -711,6 +759,12 @@ public class ArtifactViewFragment extends Fragment {
         return fieldsMatch(current.getCulturalOrigin(), other.getCulturalOrigin());
     }
 
+    /**
+     * Simple equality check of two string fields to avoid null exceptions
+     * @param field1 an arbitrary string
+     * @param field2 an arbitrary string
+     * @return true if both strings are non-null and equal. False otherwise
+     */
     private boolean fieldsMatch(String field1, String field2) {
         return field1 != null && field1.equals(field2);
     }
