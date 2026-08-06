@@ -19,6 +19,7 @@ import com.example.b07group6.construct.User;
 import com.example.b07group6.shared.UserViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 
+/** The view fragment for Profile Page */
 public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,

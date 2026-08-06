@@ -48,6 +48,7 @@ import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Fragment for the extended artifact view page. */
 public class ArtifactViewFragment extends Fragment {
 
     private NestedScrollView nestedScrollView;
@@ -270,11 +271,17 @@ public class ArtifactViewFragment extends Fragment {
         });
     }
 
+    /**
+     * Calls the action to go from expanded artifact page to home page
+     */
     public void navigateToHome() {
         userViewModel.setExtendedLotNumber(null);
         Navigation.findNavController(requireView()).navigate(R.id.action_extended_artifact_to_home);
     }
 
+    /**
+     * Defines the listener for the description's 'View More' button
+     */
     private void toggleDescription() {
         isDescriptionExpanded = !isDescriptionExpanded;
 
@@ -295,6 +302,12 @@ public class ArtifactViewFragment extends Fragment {
         TransitionManager.endTransitions(rootLayout);
     }
 
+    /**
+     * Sets all the page's data fields when page is first loaded
+     * @param artifact artifact defined by
+     * @param databaseRepository
+     * @param lotNumber
+     */
     public void setFields(Artifact artifact, FirebaseDatabaseRepository databaseRepository, String lotNumber) {
         artifactName.setText(artifact.getArtifactName());
         artifactCategory.setText(artifact.getCategory());
